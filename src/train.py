@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
 from typing import Dict
 
@@ -10,23 +9,12 @@ from torch.utils.data import DataLoader
 from dotenv import load_dotenv
 
 
-# Ensure `src` is importable when running as a script
-ROOT = Path(__file__).parent
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
 # Load environment from project-level .env (one directory up from this file)
-# This lets us configure training data location without CLI params.
+ROOT = Path(__file__).parent
 load_dotenv(dotenv_path=(ROOT.parent / ".env"))
 
-from dataloader import Lc0V6Dataset  # noqa: E402
-from model import (  # noqa: E402
-    SimpleLinearModel,
-    lc0_to_features,
-    wdl_from_qd,
-    cross_entropy_with_probs,
-)
+from dataloader import Lc0V6Dataset
+from model import SimpleLinearModel, lc0_to_features, wdl_from_qd, cross_entropy_with_probs
 
 
 def _normalize_policy_target(
@@ -45,10 +33,15 @@ def _normalize_policy_target(
 
 
 def _resolve_training_data_path() -> Path:
-    """Resolve the training data directory from environment variables."""
-    raw = os.environ["TRAINING_DATA_PATH"]
+    """Resolve the training data directory strictly from `TRAINING_DATA_PATH`.
 
-    # Expand env vars and `~` for user paths
+    Raises a clear error if not set.
+    """
+    raw = os.environ.get("TRAINING_DATA_PATH")
+    if not raw:
+        raise RuntimeError(
+            "TRAINING_DATA_PATH is not set. Define it in your .env file."
+        )
     expanded = os.path.expanduser(os.path.expandvars(raw))
     return Path(expanded)
 
