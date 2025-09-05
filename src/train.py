@@ -7,6 +7,7 @@ from typing import Dict
 
 import torch
 from torch.utils.data import DataLoader
+from dotenv import load_dotenv
 
 
 # Ensure `src` is importable when running as a script
@@ -14,6 +15,10 @@ ROOT = Path(__file__).parent
 SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
+
+# Load environment from project-level .env (one directory up from this file)
+# This lets us configure training data location without CLI params.
+load_dotenv(dotenv_path=(ROOT.parent / ".env"))
 
 from dataloader import Lc0V6Dataset  # noqa: E402
 from model import (  # noqa: E402
@@ -24,12 +29,14 @@ from model import (  # noqa: E402
 )
 
 
-def _normalize_policy_target(policy: torch.Tensor, played_idx: torch.Tensor) -> torch.Tensor:
+def _normalize_policy_target(
+    policy: torch.Tensor, played_idx: torch.Tensor
+) -> torch.Tensor:
     """Normalize policy targets; fall back to one-hot on `played_idx` if all zeros."""
     sums = policy.sum(dim=-1, keepdim=True)
     norm = policy / (sums + 1e-8)
     # Fallback for zero rows
-    zero_rows = (sums.squeeze(-1) <= 1e-8)
+    zero_rows = sums.squeeze(-1) <= 1e-8
     if zero_rows.any():
         oh = torch.zeros_like(policy)
         oh.scatter_(1, played_idx.view(-1, 1).long(), 1.0)
@@ -37,14 +44,23 @@ def _normalize_policy_target(policy: torch.Tensor, played_idx: torch.Tensor) -> 
     return norm
 
 
+def _resolve_training_data_path() -> Path:
+    """Resolve the training data directory from environment variables."""
+    raw = os.environ["TRAINING_DATA_PATH"]
+
+    # Expand env vars and `~` for user paths
+    expanded = os.path.expanduser(os.path.expandvars(raw))
+    return Path(expanded)
+
+
 def train(
-    data_dir: str | os.PathLike[str] = "tests/data",
     batch_size: int = 64,
     max_steps: int = 25,
     lr: float = 1e-2,
 ) -> Dict[str, float]:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    data_dir = _resolve_training_data_path()
     ds = Lc0V6Dataset(data_dir)
     dl = DataLoader(ds, batch_size=batch_size, num_workers=0)
 
@@ -63,7 +79,9 @@ def train(
         out = model(x)
 
         # Targets
-        pol_tgt = _normalize_policy_target(batch["policy"], batch["played_idx"])  # (B,1858)
+        pol_tgt = _normalize_policy_target(
+            batch["policy"], batch["played_idx"]
+        )  # (B,1858)
         wdl_tgt = wdl_from_qd(batch["result_q"], batch["result_d"])  # (B,3)
 
         # Losses
@@ -89,10 +107,8 @@ def train(
 
 if __name__ == "__main__":
     res = train(
-        data_dir=os.environ.get("LC0_DATA_DIR", "tests/data"),
         batch_size=int(os.environ.get("BATCH_SIZE", "64")),
         max_steps=int(os.environ.get("MAX_STEPS", "25")),
         lr=float(os.environ.get("LR", "1e-2")),
     )
     print({k: round(v, 6) for k, v in res.items()})
-
