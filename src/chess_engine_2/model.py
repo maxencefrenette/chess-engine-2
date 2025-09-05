@@ -134,3 +134,4 @@ def cross_entropy_with_probs(logits: torch.Tensor, target_probs: torch.Tensor) -
     logp = F.log_softmax(logits, dim=-1)
     loss = -(target_probs * logp).sum(dim=-1).mean()
     return loss
+

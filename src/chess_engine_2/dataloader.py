@@ -197,4 +197,3 @@ class Lc0V6Dataset(IterableDataset):
 
 
 __all__ = ["Lc0V6Dataset", "LC0_V6_RECORD_SIZE"]
-

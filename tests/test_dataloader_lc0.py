@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from dataloader import Lc0V6Dataset, LC0_V6_RECORD_SIZE
+from chess_engine_2.dataloader import Lc0V6Dataset, LC0_V6_RECORD_SIZE
 
 
 def test_dataset_reads_first_sample():
@@ -46,4 +46,3 @@ def test_dataloader_batches_sequentially():
 def test_record_size_constant():
     # Sanity: matches the official v6 record size
     assert LC0_V6_RECORD_SIZE == 8356
-

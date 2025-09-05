@@ -9,12 +9,12 @@ from torch.utils.data import DataLoader
 from dotenv import load_dotenv
 
 
-# Load environment from project-level .env (one directory up from this file)
-ROOT = Path(__file__).parent
-load_dotenv(dotenv_path=(ROOT.parent / ".env"))
+# Load environment from project-level .env (repo root: two levels up from this file)
+ROOT = Path(__file__).resolve()
+load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
-from dataloader import Lc0V6Dataset
-from model import SimpleLinearModel, lc0_to_features, wdl_from_qd, cross_entropy_with_probs
+from .dataloader import Lc0V6Dataset
+from .model import SimpleLinearModel, lc0_to_features, wdl_from_qd, cross_entropy_with_probs
 
 
 def _normalize_policy_target(
@@ -105,3 +105,4 @@ if __name__ == "__main__":
         lr=float(os.environ.get("LR", "1e-2")),
     )
     print({k: round(v, 6) for k, v in res.items()})
+
