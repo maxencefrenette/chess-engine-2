@@ -11,7 +11,6 @@ This repository implements a chess engine in Python. Use uv for dependency manag
 
 ## Build, Test, and Development Commands
 - `uv sync`: Create/update the virtual environment and install deps.
-- `uv run test -q`: Run the test suite (alias for pytest).
 - `uv run pytest -q`: Run pytest directly.
 - `uv run python main.py`: Execute the example entry point.
 
