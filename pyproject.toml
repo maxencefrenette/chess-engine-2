@@ -8,10 +8,6 @@ dependencies = [
     "torch>=2.8.0",
 ]
 
-# Expose a simple test runner so `uv run test` works.
-[project.scripts]
-test = "pytest:console_main"
-
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
