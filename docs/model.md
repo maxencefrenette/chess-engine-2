@@ -15,5 +15,5 @@ The big bet of this project is that a chess position contains a small enough amo
 
 ## Heads (Outputs)
 
-- Value: A tensor of dimensions (3) representing the expected outcome of the game as WDL probabilities.
-- Policy: A tensor of dimensions (1858) representing the expected probabilities of each move being the best move.
+- Value: A tensor of dimensions (3) representing the expected outcome of the game as WDL probabilities. It is trained using cross-entropy loss.
+- Policy: A tensor of dimensions (1858) representing the expected probabilities of each move being the best move. It is trained using cross-entropy loss.where illegal moves are masked.
