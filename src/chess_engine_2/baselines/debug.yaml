@@ -1,0 +1,4 @@
+batch_size: 3
+max_steps: 2
+lr: 0.01
+num_workers: 0

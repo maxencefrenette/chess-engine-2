@@ -15,6 +15,7 @@ load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
 from .dataloader import Lc0V6Dataset
 from .model import SimpleLinearModel, lc0_to_features, wdl_from_qd, cross_entropy_with_probs
+from .hyperparameters import Hyperparameters
 
 
 def _normalize_policy_target(
@@ -40,25 +41,22 @@ def _resolve_training_data_path() -> Path:
     raw = os.environ.get("TRAINING_DATA_PATH")
     if not raw:
         raise RuntimeError(
-            "TRAINING_DATA_PATH is not set. Define it in your .env file."
+            "TRAINING_DATA_PATH is not set. Define it in your .env file or export it."
         )
     expanded = os.path.expanduser(os.path.expandvars(raw))
     return Path(expanded)
 
 
-def train(
-    batch_size: int = 64,
-    max_steps: int = 25,
-    lr: float = 1e-2,
-) -> Dict[str, float]:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def train(hp: Hyperparameters) -> Dict[str, float]:
+    device_str = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(device_str)
 
     data_dir = _resolve_training_data_path()
     ds = Lc0V6Dataset(data_dir)
-    dl = DataLoader(ds, batch_size=batch_size, num_workers=0)
+    dl = DataLoader(ds, batch_size=hp.batch_size, num_workers=0)
 
     model = SimpleLinearModel().to(device)
-    opt = torch.optim.SGD(model.parameters(), lr=lr)
+    opt = torch.optim.SGD(model.parameters(), lr=hp.lr)
 
     step = 0
     last = {"loss": 0.0, "policy": 0.0, "value": 0.0}
@@ -92,22 +90,40 @@ def train(
             "value": float(value_loss.detach().cpu()),
         }
         step += 1
-        if step >= max_steps:
+        if step >= hp.max_steps:
             break
 
     return last
 
 
 def cli() -> None:
-    """Simple CLI for running a short training session.
+    """CLI: `uv run train <name-or-path>`
 
-    Reads `BATCH_SIZE`, `MAX_STEPS`, and `LR` from the environment.
+    - If `<name-or-path>` has no path separators, loads
+      `chess_engine_2/baselines/<name>.yaml`.
+    - Otherwise treats it as a path to a YAML file.
     """
-    res = train(
-        batch_size=int(os.environ.get("BATCH_SIZE", "64")),
-        max_steps=int(os.environ.get("MAX_STEPS", "25")),
-        lr=float(os.environ.get("LR", "1e-2")),
-    )
+    import sys
+
+    if len(sys.argv) < 2:
+        base = Path(__file__).parent / "baselines"
+        available = sorted(p.stem for p in base.glob("*.yaml"))
+        print("Usage: uv run train <baseline|/path/to/config.yaml>")
+        if available:
+            print("Available baselines:", ", ".join(available))
+        raise SystemExit(2)
+
+    arg = sys.argv[1]
+    if "/" in arg or arg.endswith(".yaml") or "." in arg:
+        cfg_path = Path(arg)
+    else:
+        cfg_path = Path(__file__).parent / "baselines" / f"{arg}.yaml"
+
+    if not cfg_path.exists():
+        raise SystemExit(f"Config not found: {cfg_path}")
+
+    hp = Hyperparameters.from_yaml(cfg_path)
+    res = train(hp)
     print({k: round(v, 6) for k, v in res.items()})
 
 
