@@ -1,34 +1,36 @@
 # Repository Guidelines
 
-This repository implements a chess engine in Python. Use uv for dependency management and pytest for tests.
+This repository implements a Python chess engine. We use `uv` for environment and dependency management and `pytest` for tests.
 
 ## Project Structure & Module Organization
-- `src/`: Python source files (e.g., `dataloader.py`).
-- `tests/`: Test suite and fixtures (e.g., `test_sanity.py`).
-- `tests/data/`: Sample assets used by tests.
-- `main.py`: Entry point for quick experiments.
-- `pyproject.toml`: Project, build, and tooling config.
+- `src/`: Python source (e.g., `dataloader.py`). Add new modules in `snake_case`; keep files focused and cohesive.
+- `tests/`: Test suite and fixtures. `tests/data/`: sample assets used by tests.
+- `main.py`: Entry point for quick experiments and manual checks.
+- `pyproject.toml`: Project metadata, dependencies, and tooling configuration.
 
 ## Build, Test, and Development Commands
-- `uv sync`: Create/update the virtual environment and install deps.
-- `uv run pytest -q`: Run pytest directly.
+- `uv sync`: Create/update the virtual environment and install dependencies.
+- `uv run pytest -q`: Run the full test suite.
+- `uv run pytest tests/test_dataloader_lc0.py -q`: Run a specific test file (example).
 - `uv run python main.py`: Execute the example entry point.
 
 ## Coding Style & Naming Conventions
-- **Python**: 4‑space indentation, type hints for new code.
-- **Names**: modules `snake_case.py`, classes `CamelCase`, functions `snake_case`.
-- **Formatting/Linting**: Keep imports tidy and lines reasonable (PEP 8). Add ruff/black later if needed.
+- **Python**: ≥3.13; 4‑space indentation; prefer type hints for new code.
+- **Names**: modules `snake_case.py`; classes `CamelCase`; functions `snake_case`.
+- **Style**: keep imports tidy; follow PEP 8; keep lines reasonable. Ruff/Black may be added later—format proactively and consistently.
 
 ## Testing Guidelines
-- **Framework**: pytest; add tests under `tests/` with files named `test_*.py`.
-- **Running**: `uv run test -q` (or `uv run pytest`).
-- **Coverage**: Prefer meaningful unit tests around move generation, evaluation, and I/O.
+- **Framework**: `pytest`; place tests under `tests/` with files named `test_*.py`.
+- **Focus**: add unit tests for move generation, evaluation, and I/O paths.
+- **Data**: use `tests/data/` for assets; keep fixtures deterministic and small.
+- **Run**: `uv run pytest -q` (or `uv run test -q` if available).
 
 ## Commit & Pull Request Guidelines
-- **Commits**: Clear, imperative subject (e.g., "Add move generator"), with a brief body explaining rationale.
-- **PRs**: Link issues, describe changes, include screenshots or logs when helpful, and note any breaking changes.
-- **Checks**: Ensure tests pass locally before requesting review.
+- **Commits**: imperative subject (e.g., "Add move generator"); brief body explaining rationale.
+- **PRs**: link issues, describe changes and risk, include logs/screenshots when helpful, and note any breaking changes.
+- **Checks**: ensure `uv run pytest -q` passes locally before requesting review.
 
 ## Security & Configuration Tips
-- Avoid committing large datasets or secrets; keep credentials in env vars.
-- Use Python ≥3.13; sync via `uv sync` to reproduce the environment.
+- Avoid committing secrets or large datasets; load credentials from environment variables.
+- Prefer small, shareable assets under `tests/data/`.
+- Reproduce environments with `uv sync`; keep dependencies minimal and scoped to needs.
