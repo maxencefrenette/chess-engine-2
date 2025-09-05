@@ -98,7 +98,11 @@ def train(
     return last
 
 
-if __name__ == "__main__":
+def cli() -> None:
+    """Simple CLI for running a short training session.
+
+    Reads `BATCH_SIZE`, `MAX_STEPS`, and `LR` from the environment.
+    """
     res = train(
         batch_size=int(os.environ.get("BATCH_SIZE", "64")),
         max_steps=int(os.environ.get("MAX_STEPS", "25")),
@@ -106,3 +110,6 @@ if __name__ == "__main__":
     )
     print({k: round(v, 6) for k, v in res.items()})
 
+
+if __name__ == "__main__":
+    cli()
