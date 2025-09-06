@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import sys
-from dataclasses import asdict
 from pathlib import Path
 
 import torch
@@ -75,7 +74,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     wandb_run = wandb.init(
         project=WANDB_PROJECT,
         name=run_name,
-        config=asdict(hp),
+        config=hp.model_dump(),
         dir=Path(os.environ["WANDB_PATH"]).expanduser(),
     )
 

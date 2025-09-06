@@ -2,35 +2,33 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import yaml
+from pydantic import BaseModel, ConfigDict, Field
 
 
-@dataclass
-class Hyperparameters:
-    """Typed training configuration loaded from YAML.
+class Hyperparameters(BaseModel):
+    """Typed training configuration loaded from YAML, validated by Pydantic.
 
-    Note: data path, device, and worker settings are controlled by the trainer,
-    not part of this config.
+    Extra keys in the YAML are ignored to keep configs forward‑compatible.
     """
 
-    batch_size: int
-    max_steps: int
-    lr: float
-    model_dim: int
-    intermediate_dim: int
-    layers: int
-    value_sampling_rate: float
+    model_config = ConfigDict(extra="forbid")
+
+    batch_size: int = Field(gt=0)
+    max_steps: int = Field(gt=0)
+    lr: float = Field(gt=0)
+    model_dim: int = Field(gt=0)
+    intermediate_dim: int = Field(gt=0)
+    layers: int = Field(gt=0)
+    value_sampling_rate: float = Field(ge=0.0, le=1.0)
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Hyperparameters:
-        # Accept a flat mapping; ignore unknown keys for forward-compatibility.
-        allowed = {f.name for f in cls.__dataclass_fields__.values()}  # type: ignore[attr-defined]
-        filtered = {k: v for k, v in dict(data).items() if k in allowed}
-        return cls(**filtered)  # type: ignore[arg-type]
+        # Construct directly and let Pydantic validate, ignoring unknown keys.
+        return cls(**dict(data))
 
     @classmethod
     def from_yaml(cls, path: os.PathLike[str] | str) -> Hyperparameters:

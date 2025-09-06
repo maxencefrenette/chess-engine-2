@@ -1,7 +1,6 @@
 batch_size: 16
 max_steps: 10
 lr: 0.01
-num_workers: 0
 model_dim: 256
 intermediate_dim: 1024
 layers: 4
