@@ -6,6 +6,7 @@ import os
 import struct
 import tarfile
 from collections.abc import Iterator
+import random
 from pathlib import Path
 
 import torch
@@ -65,11 +66,15 @@ class Lc0V6Dataset(IterableDataset):
     - Only format version 6 is supported; other versions raise ValueError.
     """
 
-    def __init__(self, root_dir: str | os.PathLike[str]):
+    def __init__(self, root_dir: str | os.PathLike[str], sampling_rate: float = 1.0):
         super().__init__()
         self.root_dir = Path(root_dir)
         if not self.root_dir.exists() or not self.root_dir.is_dir():
             raise FileNotFoundError(f"Directory not found: {self.root_dir}")
+        if not (0.0 <= float(sampling_rate) <= 1.0):
+            raise ValueError("sampling_rate must be in [0.0, 1.0]")
+        # Fraction of positions kept and yielded.
+        self.sampling_rate = float(sampling_rate)
 
     def _tar_paths(self) -> list[Path]:
         paths = sorted(self.root_dir.glob("*.tar"))
@@ -99,6 +104,10 @@ class Lc0V6Dataset(IterableDataset):
                             raw = _read_exact(gz, LC0_V6_RECORD_SIZE)
                             if raw is None:
                                 break
+
+                            # Subsample: decide early and skip heavy parsing if dropping.
+                            if self.sampling_rate < 1.0 and random.random() >= self.sampling_rate:
+                                continue
 
                             (
                                 version,

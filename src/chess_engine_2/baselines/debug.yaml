@@ -5,3 +5,4 @@ num_workers: 0
 model_dim: 256
 intermediate_dim: 1024
 layers: 4
+sampling_rate: 0.01

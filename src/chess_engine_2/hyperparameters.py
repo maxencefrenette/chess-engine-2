@@ -23,6 +23,7 @@ class Hyperparameters:
     model_dim: int
     intermediate_dim: int
     layers: int
+    sampling_rate: float
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Hyperparameters:

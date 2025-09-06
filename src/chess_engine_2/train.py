@@ -55,7 +55,7 @@ def train(hp: Hyperparameters) -> dict[str, float]:
     device = torch.device(device_str)
 
     data_dir = _resolve_training_data_path()
-    ds = Lc0V6Dataset(data_dir)
+    ds = Lc0V6Dataset(data_dir, sampling_rate=hp.sampling_rate)
     dl = DataLoader(ds, batch_size=hp.batch_size, num_workers=0)
 
     model = MLPModel(hp).to(device)
