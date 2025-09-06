@@ -27,7 +27,7 @@ This repository implements a Python chess engine. We use `uv` for environment an
 
 ## Commit & Pull Request Guidelines
 - **Commits**: imperative subject (e.g., "Add move generator"); brief body explaining rationale.
-- **PRs**: link issues, describe changes and risk, include logs/screenshots when helpful, and note any breaking changes.
+- **PRs**: link issues, describe changes and risk, include logs/screenshots when helpful.
 - **Checks**: ensure `uv run pytest -q` passes locally before requesting review.
 
 ## Security & Configuration Tips
