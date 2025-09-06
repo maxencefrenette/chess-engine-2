@@ -1,4 +1,5 @@
 # chess-engine-2
+
 Yet another attempt at making a chess engine
 
 ## Acknowledgements
@@ -17,6 +18,7 @@ Examples:
 
 - CLI: `WANDB_PROJECT=chess-engine-2 WANDB_NAME="my-run" uv run train <baseline>`
 - Python:
+  
   ```py
   from chess_engine_2.hyperparameters import Hyperparameters
   from chess_engine_2.train import train
