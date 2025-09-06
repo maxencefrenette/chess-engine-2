@@ -27,7 +27,6 @@ class Hyperparameters(BaseModel):
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Hyperparameters:
-        # Construct directly and let Pydantic validate, ignoring unknown keys.
         return cls(**dict(data))
 
     @classmethod
