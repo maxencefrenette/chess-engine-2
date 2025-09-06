@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from .hyperparameters import Hyperparameters
 
 # Features per docs/model.md
 # - Board: (12, 8, 8) one-hot planes (PNBRQKpnbrqk) from STM perspective
@@ -50,7 +50,9 @@ def _castling_vector(
     )
 
 
-def _enpassant_vector(side_to_move_or_ep: torch.Tensor, input_format: torch.Tensor) -> torch.Tensor:
+def _enpassant_vector(
+    side_to_move_or_ep: torch.Tensor, input_format: torch.Tensor
+) -> torch.Tensor:
     """Return 8-dim ep file mask.
     For input_format==3, the field contains an EP file bitmask; otherwise zeros.
     """
@@ -74,7 +76,9 @@ def lc0_to_features(batch: dict[str, torch.Tensor]) -> torch.Tensor:
 
     Returns a tensor of shape (B, 881) dtype=float32.
     """
-    planes_u64 = batch["planes"][:, :12]  # first 12 are PNBRQKpnbrqk (from STM perspective)
+    planes_u64 = batch["planes"][
+        :, :12
+    ]  # first 12 are PNBRQKpnbrqk (from STM perspective)
     board = _bitboards12_to_planes(planes_u64)
 
     # us_oo is index 1 in dataloader order? We provided [us_ooo, us_oo, ...]
@@ -119,29 +123,72 @@ def wdl_from_qd(q: torch.Tensor, d: torch.Tensor) -> torch.Tensor:
     return out
 
 
-@dataclass
-class ModelConfig:
-    in_dim: int = 881
-    out_policy: int = 1858
-    out_value: int = 3
+# Constants for feature sizes and output heads
+IN_DIM = 881
+OUT_POLICY = 1858
+OUT_VALUE = 3
 
 
-class SimpleLinearModel(nn.Module):
-    """Single linear layer mapping 881 -> (1858 policy logits, 3 value logits)."""
+class SwiGLU(nn.Module):
+    """SwiGLU gated MLP: silu(W_g x) * (W_u x) as in modern LLMs."""
 
-    def __init__(self, cfg: ModelConfig | None = None):
+    def __init__(self, in_dim: int, hidden_dim: int):
         super().__init__()
-        self.cfg = cfg or ModelConfig()
-        self.fc = nn.Linear(self.cfg.in_dim, self.cfg.out_policy + self.cfg.out_value)
+        self.w_u = nn.Linear(in_dim, hidden_dim, bias=False)
+        self.w_g = nn.Linear(in_dim, hidden_dim, bias=False)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return F.silu(self.w_g(x)) * self.w_u(x)
+
+
+class MLPBlock(nn.Module):
+    """Pre-LN SwiGLU block with residual connection."""
+
+    def __init__(self, model_dim: int, intermediate_dim: int):
+        super().__init__()
+        self.norm = nn.RMSNorm(model_dim)
+        self.up_proj = nn.Linear(model_dim, intermediate_dim, bias=False)
+        self.gate_proj = nn.Linear(model_dim, intermediate_dim, bias=False)
+        self.down_proj = nn.Linear(intermediate_dim, model_dim, bias=False)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        y = self.norm(x)
+        y = F.silu(self.gate_proj(y)) * self.up_proj(y)
+        y = self.down_proj(y)
+        return x + y
+
+
+class MLPModel(nn.Module):
+    """SwiGLU MLP over flat chess features with policy/value heads.
+
+    The constructor accepts a `Hyperparameters` instance with fields:
+    embedding_dim, hidden_dim, layers.
+    """
+
+    def __init__(self, hp: Hyperparameters):  # Hyperparameters injected by caller
+        super().__init__()
+
+        self.input_proj = nn.Linear(IN_DIM, hp.model_dim)
+        self.blocks = nn.Sequential(
+            *(MLPBlock(hp.model_dim, hp.intermediate_dim) for _ in range(hp.layers))
+        )
+        self.norm = nn.LayerNorm(hp.model_dim)
+        self.policy_head = nn.Linear(hp.model_dim, OUT_POLICY)
+        self.value_head = nn.Linear(hp.model_dim, OUT_VALUE)
 
     def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
-        out = self.fc(x)
-        policy_logits = out[:, : self.cfg.out_policy]
-        value_logits = out[:, self.cfg.out_policy :]
-        return {"policy_logits": policy_logits, "value_logits": value_logits}
+        h = self.input_proj(x)
+        h = self.blocks(h)
+        h = self.norm(h)
+        return {
+            "policy_logits": self.policy_head(h),
+            "value_logits": self.value_head(h),
+        }
 
 
-def cross_entropy_with_probs(logits: torch.Tensor, target_probs: torch.Tensor) -> torch.Tensor:
+def cross_entropy_with_probs(
+    logits: torch.Tensor, target_probs: torch.Tensor
+) -> torch.Tensor:
     """Cross-entropy for probabilistic targets: -sum p * log_softmax(logits)."""
     logp = F.log_softmax(logits, dim=-1)
     loss = -(target_probs * logp).sum(dim=-1).mean()

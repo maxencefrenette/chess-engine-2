@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 from .dataloader import Lc0V6Dataset
 from .hyperparameters import Hyperparameters
 from .model import (
-    SimpleLinearModel,
+    MLPModel,
     cross_entropy_with_probs,
     lc0_to_features,
     wdl_from_qd,
@@ -21,7 +21,9 @@ ROOT = Path(__file__).resolve()
 load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
 
-def _normalize_policy_target(policy: torch.Tensor, played_idx: torch.Tensor) -> torch.Tensor:
+def _normalize_policy_target(
+    policy: torch.Tensor, played_idx: torch.Tensor
+) -> torch.Tensor:
     """Normalize policy targets; fall back to one-hot on `played_idx` if all zeros."""
     sums = policy.sum(dim=-1, keepdim=True)
     norm = policy / (sums + 1e-8)
@@ -56,7 +58,7 @@ def train(hp: Hyperparameters) -> dict[str, float]:
     ds = Lc0V6Dataset(data_dir)
     dl = DataLoader(ds, batch_size=hp.batch_size, num_workers=0)
 
-    model = SimpleLinearModel().to(device)
+    model = MLPModel(hp).to(device)
     opt = torch.optim.SGD(model.parameters(), lr=hp.lr)
 
     step = 0
@@ -71,7 +73,9 @@ def train(hp: Hyperparameters) -> dict[str, float]:
         out = model(x)
 
         # Targets
-        pol_tgt = _normalize_policy_target(batch["policy"], batch["played_idx"])  # (B,1858)
+        pol_tgt = _normalize_policy_target(
+            batch["policy"], batch["played_idx"]
+        )  # (B,1858)
         wdl_tgt = wdl_from_qd(batch["result_q"], batch["result_d"])  # (B,3)
 
         # Losses

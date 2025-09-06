@@ -11,11 +11,18 @@ import yaml
 
 @dataclass
 class Hyperparameters:
-    """Typed training configuration loaded from YAML."""
+    """Typed training configuration loaded from YAML.
+
+    Note: data path, device, and worker settings are controlled by the trainer,
+    not part of this config.
+    """
 
     batch_size: int
     max_steps: int
     lr: float
+    model_dim: int
+    intermediate_dim: int
+    layers: int
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Hyperparameters:
@@ -30,7 +37,9 @@ class Hyperparameters:
         with p.open("r", encoding="utf-8") as f:
             content = yaml.safe_load(f) or {}
         if not isinstance(content, Mapping):
-            raise ValueError(f"Expected a mapping at {p}, got: {type(content).__name__}")
+            raise ValueError(
+                f"Expected a mapping at {p}, got: {type(content).__name__}"
+            )
         return cls.from_dict(content)
 
 
