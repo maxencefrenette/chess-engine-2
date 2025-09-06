@@ -185,6 +185,49 @@ class MLPModel(nn.Module):
             "value_logits": self.value_head(h),
         }
 
+    @staticmethod
+    def flops_per_batch(hp: Hyperparameters, *, device: str | torch.device = "cpu") -> int:
+        """Estimate FLOPs for a single train batch (fwd + bwd).
+
+        This constructs an ``MLPModel`` from ``hp`` and a dummy input of shape
+        ``(hp.batch_size, IN_DIM)`` and measures the total floating‑point
+        operations performed by a full forward pass plus a backward pass, using
+        ``torch.utils.flop_counter.FlopCounterMode``. The returned value counts
+        per‑batch FLOPs on the specified ``device``.
+
+        Notes
+        - FLOP accounting depends on PyTorch's flop counter support for the ops
+          involved and may evolve across PyTorch versions.
+        - The value includes both forward and autograd backward ops.
+        """
+        # Import locally to avoid a hard import requirement for callers that
+        # don't use FLOP counting.
+        try:
+            from torch.utils.flop_counter import FlopCounterMode  # type: ignore
+        except Exception as exc:  # pragma: no cover - environment dependent
+            raise RuntimeError(
+                "torch.utils.flop_counter is unavailable in this environment."
+            ) from exc
+
+        dev = torch.device(device)
+        # Build a fresh model instance on the requested device
+        model = MLPModel(hp).to(dev)
+        model.train()  # training mode to reflect backward usage
+
+        # Dummy batch matching the feature dimensionality
+        x = torch.randn(hp.batch_size, IN_DIM, device=dev, dtype=torch.float32)
+        x.requires_grad_(True)
+
+        # Count FLOPs for forward + backward
+        counter = FlopCounterMode(display=False)
+        with counter:
+            out = model(x)
+            # Create a scalar loss to backpropagate through both heads
+            loss = out["policy_logits"].sum() + out["value_logits"].sum()
+            loss.backward()
+
+        return int(counter.get_total_flops())
+
 
 def cross_entropy_with_probs(
     logits: torch.Tensor, target_probs: torch.Tensor, *, weights: torch.Tensor | None = None
