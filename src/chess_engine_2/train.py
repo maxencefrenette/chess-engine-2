@@ -71,16 +71,12 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     model = MLPModel(hp).to(device)
     opt = torch.optim.SGD(model.parameters(), lr=hp.lr)
 
-    # Initialize wandb logging (if available and enabled)
-    wandb_run = None
-    wandb_kwargs = {
-        "project": WANDB_PROJECT,
-        "config": asdict(hp),
-        "dir": os.environ["WANDB_PATH"],
-    }
-    if run_name is not None:
-        wandb_kwargs["name"] = run_name
-    wandb_run = wandb.init(**wandb_kwargs)
+    wandb_run = wandb.init(
+        project=WANDB_PROJECT,
+        name=run_name,
+        config=asdict(hp),
+        dir=Path(os.environ["WANDB_PATH"]).expanduser(),
+    )
 
     step = 0
     last = {"loss": 0.0, "policy": 0.0, "value": 0.0}
