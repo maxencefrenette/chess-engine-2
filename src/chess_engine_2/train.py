@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
+from dataclasses import asdict
 from pathlib import Path
 
 import torch
+import wandb
 from dotenv import load_dotenv
 from torch.utils.data import DataLoader
 
@@ -19,6 +21,8 @@ from .model import (
 # Load environment from project-level .env (repo root: two levels up from this file)
 ROOT = Path(__file__).resolve()
 load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
+
+WANDB_PROJECT = "chess-engine-2"
 
 
 def _normalize_policy_target(
@@ -50,7 +54,13 @@ def _resolve_training_data_path() -> Path:
     return Path(expanded)
 
 
-def train(hp: Hyperparameters) -> dict[str, float]:
+def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
+    """Train the model for ``hp.max_steps`` and return last-step metrics.
+
+    Parameters
+    - hp: Training hyperparameters.
+    - name: Optional run name used for the Weights & Biases run.
+    """
     device_str = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(device_str)
 
@@ -60,6 +70,17 @@ def train(hp: Hyperparameters) -> dict[str, float]:
 
     model = MLPModel(hp).to(device)
     opt = torch.optim.SGD(model.parameters(), lr=hp.lr)
+
+    # Initialize wandb logging (if available and enabled)
+    wandb_run = None
+    wandb_kwargs = {
+        "project": WANDB_PROJECT,
+        "config": asdict(hp),
+        "dir": os.environ["WANDB_PATH"],
+    }
+    if run_name is not None:
+        wandb_kwargs["name"] = run_name
+    wandb_run = wandb.init(**wandb_kwargs)
 
     step = 0
     last = {"loss": 0.0, "policy": 0.0, "value": 0.0}
@@ -99,9 +120,14 @@ def train(hp: Hyperparameters) -> dict[str, float]:
             "policy": float(policy_loss.detach().cpu()),
             "value": float(value_loss.detach().cpu()),
         }
+        if wandb_run is not None:
+            wandb_run.log(last, step=step)
         step += 1
         if step >= hp.max_steps:
             break
+
+    if wandb_run is not None:
+        wandb_run.finish()
 
     return last
 
@@ -133,7 +159,7 @@ def cli() -> None:
         raise SystemExit(f"Config not found: {cfg_path}")
 
     hp = Hyperparameters.from_yaml(cfg_path)
-    res = train(hp)
+    res = train(arg, hp)
     print({k: round(v, 6) for k, v in res.items()})
 
 
