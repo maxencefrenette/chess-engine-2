@@ -18,7 +18,7 @@ class Hyperparameters(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     batch_size: int = Field(gt=0)
-    max_steps: int = Field(gt=0)
+    steps: int = Field(gt=0)
     lr: float = Field(gt=0)
     model_dim: int = Field(gt=0)
     intermediate_dim: int = Field(gt=0)

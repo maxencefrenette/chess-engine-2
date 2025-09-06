@@ -119,7 +119,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         if wandb_run is not None:
             wandb_run.log(last, step=step)
         step += 1
-        if step >= hp.max_steps:
+        if step >= hp.steps:
             break
 
     if wandb_run is not None:
