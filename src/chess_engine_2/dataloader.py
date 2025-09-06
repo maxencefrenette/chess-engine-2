@@ -1,16 +1,15 @@
 from __future__ import annotations
 
+import gzip
 import io
 import os
-import tarfile
-import gzip
 import struct
+import tarfile
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Dict, Iterable, Iterator, List, Optional
 
 import torch
 from torch.utils.data import IterableDataset
-
 
 # Lc0 V6 training record description
 # Source of the format specification: Leela Chess Zero wiki (V6TrainingData, size 8356).
@@ -33,9 +32,9 @@ _LC0_V6_STRUCT = struct.Struct(
 )
 
 
-def _read_exact(stream: io.BufferedReader, n: int) -> Optional[bytes]:
+def _read_exact(stream: io.BufferedReader, n: int) -> bytes | None:
     """Read exactly n bytes from stream; return None if EOF reached before any data."""
-    chunks: List[bytes] = []
+    chunks: list[bytes] = []
     remaining = n
     while remaining > 0:
         chunk = stream.read(remaining)
@@ -72,11 +71,11 @@ class Lc0V6Dataset(IterableDataset):
         if not self.root_dir.exists() or not self.root_dir.is_dir():
             raise FileNotFoundError(f"Directory not found: {self.root_dir}")
 
-    def _tar_paths(self) -> List[Path]:
+    def _tar_paths(self) -> list[Path]:
         paths = sorted(self.root_dir.glob("*.tar"))
         return paths
 
-    def _gz_members(self, tf: tarfile.TarFile) -> List[tarfile.TarInfo]:
+    def _gz_members(self, tf: tarfile.TarFile) -> list[tarfile.TarInfo]:
         members = [
             m
             for m in tf.getmembers()
@@ -88,7 +87,7 @@ class Lc0V6Dataset(IterableDataset):
         members.sort(key=lambda m: m.name)
         return members
 
-    def __iter__(self) -> Iterator[Dict[str, torch.Tensor | int | float]]:
+    def __iter__(self) -> Iterator[dict[str, torch.Tensor | int | float]]:
         for tar_path in self._tar_paths():
             with tarfile.open(tar_path, mode="r") as tf:
                 for m in self._gz_members(tf):
@@ -114,7 +113,8 @@ class Lc0V6Dataset(IterableDataset):
 
                             # Split fields according to the struct layout.
                             # rest contains: probabilities[1858], planes[104], 8B,
-                            # 15f, visits (I), played_idx (H), best_idx (H), policy_kld (f), reserved (I)
+                            # 15f, visits (I), played_idx (H), best_idx (H), policy_kld (f),
+                            # reserved (I)
 
                             probs = rest[:1858]
                             planes = rest[1858 : 1858 + 104]

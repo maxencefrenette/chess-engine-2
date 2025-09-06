@@ -2,25 +2,26 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Dict
 
 import torch
-from torch.utils.data import DataLoader
 from dotenv import load_dotenv
+from torch.utils.data import DataLoader
 
+from .dataloader import Lc0V6Dataset
+from .hyperparameters import Hyperparameters
+from .model import (
+    SimpleLinearModel,
+    cross_entropy_with_probs,
+    lc0_to_features,
+    wdl_from_qd,
+)
 
 # Load environment from project-level .env (repo root: two levels up from this file)
 ROOT = Path(__file__).resolve()
 load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
-from .dataloader import Lc0V6Dataset
-from .model import SimpleLinearModel, lc0_to_features, wdl_from_qd, cross_entropy_with_probs
-from .hyperparameters import Hyperparameters
 
-
-def _normalize_policy_target(
-    policy: torch.Tensor, played_idx: torch.Tensor
-) -> torch.Tensor:
+def _normalize_policy_target(policy: torch.Tensor, played_idx: torch.Tensor) -> torch.Tensor:
     """Normalize policy targets; fall back to one-hot on `played_idx` if all zeros."""
     sums = policy.sum(dim=-1, keepdim=True)
     norm = policy / (sums + 1e-8)
@@ -47,7 +48,7 @@ def _resolve_training_data_path() -> Path:
     return Path(expanded)
 
 
-def train(hp: Hyperparameters) -> Dict[str, float]:
+def train(hp: Hyperparameters) -> dict[str, float]:
     device_str = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(device_str)
 
@@ -70,9 +71,7 @@ def train(hp: Hyperparameters) -> Dict[str, float]:
         out = model(x)
 
         # Targets
-        pol_tgt = _normalize_policy_target(
-            batch["policy"], batch["played_idx"]
-        )  # (B,1858)
+        pol_tgt = _normalize_policy_target(batch["policy"], batch["played_idx"])  # (B,1858)
         wdl_tgt = wdl_from_qd(batch["result_q"], batch["result_d"])  # (B,3)
 
         # Losses

@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, Tuple
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
 
 # Features per docs/model.md
 # - Board: (12, 8, 8) one-hot planes (PNBRQKpnbrqk) from STM perspective
@@ -26,7 +24,7 @@ def _bitboards12_to_planes(boards: torch.Tensor) -> torch.Tensor:
     B = boards.size(0)
     device = boards.device
     idx = torch.arange(64, dtype=torch.int64, device=device)
-    masks = (torch.ones(64, dtype=torch.int64, device=device) << idx)
+    masks = torch.ones(64, dtype=torch.int64, device=device) << idx
     boards_i64 = boards.to(torch.int64)
     # (B, 12, 64) of bits via masking to avoid uint64 shifts on CPU
     bits = ((boards_i64.unsqueeze(-1) & masks) != 0).to(torch.float32)
@@ -34,15 +32,22 @@ def _bitboards12_to_planes(boards: torch.Tensor) -> torch.Tensor:
     return planes
 
 
-def _castling_vector(us_oo: torch.Tensor, us_ooo: torch.Tensor,
-                     them_oo: torch.Tensor, them_ooo: torch.Tensor) -> torch.Tensor:
+def _castling_vector(
+    us_oo: torch.Tensor,
+    us_ooo: torch.Tensor,
+    them_oo: torch.Tensor,
+    them_ooo: torch.Tensor,
+) -> torch.Tensor:
     # Order: K Q k q
-    return torch.stack([
-        (us_oo > 0).to(torch.float32),
-        (us_ooo > 0).to(torch.float32),
-        (them_oo > 0).to(torch.float32),
-        (them_ooo > 0).to(torch.float32),
-    ], dim=-1)
+    return torch.stack(
+        [
+            (us_oo > 0).to(torch.float32),
+            (us_ooo > 0).to(torch.float32),
+            (them_oo > 0).to(torch.float32),
+            (them_ooo > 0).to(torch.float32),
+        ],
+        dim=-1,
+    )
 
 
 def _enpassant_vector(side_to_move_or_ep: torch.Tensor, input_format: torch.Tensor) -> torch.Tensor:
@@ -64,7 +69,7 @@ def _rule50_one_hot(rule50: torch.Tensor) -> torch.Tensor:
     return oh
 
 
-def lc0_to_features(batch: Dict[str, torch.Tensor]) -> torch.Tensor:
+def lc0_to_features(batch: dict[str, torch.Tensor]) -> torch.Tensor:
     """Transform a collated Lc0 batch (from Lc0V6Dataset) into 881-dim features per docs.
 
     Returns a tensor of shape (B, 881) dtype=float32.
@@ -72,22 +77,29 @@ def lc0_to_features(batch: Dict[str, torch.Tensor]) -> torch.Tensor:
     planes_u64 = batch["planes"][:, :12]  # first 12 are PNBRQKpnbrqk (from STM perspective)
     board = _bitboards12_to_planes(planes_u64)
 
+    # us_oo is index 1 in dataloader order? We provided [us_ooo, us_oo, ...]
     cast = _castling_vector(
-        batch["castling"][:, 1],  # us_oo is index 1 in dataloader order? We provided [us_ooo, us_oo, ...]
+        batch["castling"][:, 1],
         batch["castling"][:, 0],
         batch["castling"][:, 3],
         batch["castling"][:, 2],
     )
 
-    ep = _enpassant_vector(batch["side_to_move_or_enpassant"].to(torch.int64), batch["input_format"].to(torch.int64))
+    ep = _enpassant_vector(
+        batch["side_to_move_or_enpassant"].to(torch.int64),
+        batch["input_format"].to(torch.int64),
+    )
     r50 = _rule50_one_hot(batch["rule50"].to(torch.int64))
 
-    feats = torch.cat([
-        board.reshape(board.size(0), -1),  # 12*64
-        cast.to(torch.float32),            # 4
-        ep.to(torch.float32),              # 8
-        r50.to(torch.float32),             # 101
-    ], dim=1)
+    feats = torch.cat(
+        [
+            board.reshape(board.size(0), -1),  # 12*64
+            cast.to(torch.float32),  # 4
+            ep.to(torch.float32),  # 8
+            r50.to(torch.float32),  # 101
+        ],
+        dim=1,
+    )
     assert feats.shape[1] == 881
     return feats
 
@@ -122,7 +134,7 @@ class SimpleLinearModel(nn.Module):
         self.cfg = cfg or ModelConfig()
         self.fc = nn.Linear(self.cfg.in_dim, self.cfg.out_policy + self.cfg.out_value)
 
-    def forward(self, x: torch.Tensor) -> Dict[str, torch.Tensor]:
+    def forward(self, x: torch.Tensor) -> dict[str, torch.Tensor]:
         out = self.fc(x)
         policy_logits = out[:, : self.cfg.out_policy]
         value_logits = out[:, self.cfg.out_policy :]
@@ -134,4 +146,3 @@ def cross_entropy_with_probs(logits: torch.Tensor, target_probs: torch.Tensor) -
     logp = F.log_softmax(logits, dim=-1)
     loss = -(target_probs * logp).sum(dim=-1).mean()
     return loss
-

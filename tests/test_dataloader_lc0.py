@@ -1,10 +1,8 @@
-import itertools
 from pathlib import Path
 
-import pytest
 import torch
 
-from chess_engine_2.dataloader import Lc0V6Dataset, LC0_V6_RECORD_SIZE
+from chess_engine_2.dataloader import LC0_V6_RECORD_SIZE, Lc0V6Dataset
 
 
 def test_dataset_reads_first_sample():

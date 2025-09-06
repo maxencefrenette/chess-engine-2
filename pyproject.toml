@@ -14,6 +14,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "ruff>=0.6.8",
 ]
 
 [build-system]
@@ -23,6 +24,33 @@ build-backend = "uv_build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src"]
+exclude = [
+    ".venv",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle (errors)
+    "F",   # pyflakes
+    "I",   # isort (imports)
+    "UP",  # pyupgrade
+    "B",   # bugbear
+]
+ignore = []
+
+[tool.ruff.lint.isort]
+known-first-party = ["chess_engine_2"]
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
 
 [project.scripts]
 train = "chess_engine_2.train:cli"

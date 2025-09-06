@@ -6,4 +6,3 @@ pytest's `pythonpath = ["src"]` for local imports. The empty package ensures
 """
 
 __all__: list[str] = []
-
