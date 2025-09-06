@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import asdict
 from pathlib import Path
 
@@ -131,11 +132,8 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
 def cli() -> None:
     """CLI: `uv run train <name-or-path>`
 
-    - If `<name-or-path>` has no path separators, loads
-      `chess_engine_2/baselines/<name>.yaml`.
-    - Otherwise treats it as a path to a YAML file.
+    Loads `chess_engine_2/baselines/<name>.yaml`.
     """
-    import sys
 
     if len(sys.argv) < 2:
         base = Path(__file__).parent / "baselines"
@@ -145,17 +143,14 @@ def cli() -> None:
             print("Available baselines:", ", ".join(available))
         raise SystemExit(2)
 
-    arg = sys.argv[1]
-    if "/" in arg or arg.endswith(".yaml") or "." in arg:
-        cfg_path = Path(arg)
-    else:
-        cfg_path = Path(__file__).parent / "baselines" / f"{arg}.yaml"
+    baseline_name = sys.argv[1]
+    cfg_path = Path(__file__).parent / "baselines" / f"{baseline_name}.yaml"
 
     if not cfg_path.exists():
         raise SystemExit(f"Config not found: {cfg_path}")
 
     hp = Hyperparameters.from_yaml(cfg_path)
-    res = train(arg, hp)
+    res = train(baseline_name, hp)
     print({k: round(v, 6) for k, v in res.items()})
 
 
