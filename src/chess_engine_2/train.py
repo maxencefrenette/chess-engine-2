@@ -55,7 +55,7 @@ def train(hp: Hyperparameters) -> dict[str, float]:
     device = torch.device(device_str)
 
     data_dir = _resolve_training_data_path()
-    ds = Lc0V6Dataset(data_dir, sampling_rate=hp.sampling_rate)
+    ds = Lc0V6Dataset(data_dir)
     dl = DataLoader(ds, batch_size=hp.batch_size, num_workers=0)
 
     model = MLPModel(hp).to(device)
@@ -80,7 +80,14 @@ def train(hp: Hyperparameters) -> dict[str, float]:
 
         # Losses
         policy_loss = cross_entropy_with_probs(out["policy_logits"], pol_tgt)
-        value_loss = cross_entropy_with_probs(out["value_logits"], wdl_tgt)
+        # Value loss masking: keep each sample with prob = value_sampling_rate
+        B = pol_tgt.size(0)
+        value_keep = (torch.rand(B, device=device) < float(hp.value_sampling_rate)).to(
+            torch.float32
+        )
+        value_loss = cross_entropy_with_probs(
+            out["value_logits"], wdl_tgt, weights=value_keep
+        )
         loss = policy_loss + value_loss
 
         opt.zero_grad(set_to_none=True)

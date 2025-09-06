@@ -187,9 +187,20 @@ class MLPModel(nn.Module):
 
 
 def cross_entropy_with_probs(
-    logits: torch.Tensor, target_probs: torch.Tensor
+    logits: torch.Tensor, target_probs: torch.Tensor, *, weights: torch.Tensor | None = None
 ) -> torch.Tensor:
-    """Cross-entropy for probabilistic targets: -sum p * log_softmax(logits)."""
+    """Cross-entropy for probabilistic targets with optional sample weights.
+
+    Computes per-sample loss = -sum p * log_softmax(logits), and returns:
+    - mean over batch if `weights` is None
+    - weighted mean sum(w*l)/sum(w) if `weights` is provided (0-d if sum(w)==0 -> 0)
+    """
     logp = F.log_softmax(logits, dim=-1)
-    loss = -(target_probs * logp).sum(dim=-1).mean()
-    return loss
+    per_sample = -(target_probs * logp).sum(dim=-1)
+    if weights is None:
+        return per_sample.mean()
+    w = weights.to(per_sample.dtype)
+    denom = w.sum()
+    if denom.item() == 0.0:
+        return per_sample.new_tensor(0.0)
+    return (per_sample * w).sum() / denom
