@@ -100,7 +100,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         pol_tgt = _normalize_policy_target(
             batch["policy"], batch["played_idx"]
         )  # (B,1858)
-        wdl_tgt = wdl_from_qd(batch["result_q"], batch["result_d"])  # (B,3)
+        wdl_tgt = wdl_from_qd(batch["root_q"], batch["root_d"])  # (B,3)
 
         # Mask illegal moves at the logits level wherever policy < 0
         # This prevents illegal classes from contributing to the loss.
