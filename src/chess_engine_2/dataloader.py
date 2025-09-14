@@ -157,7 +157,7 @@ class Lc0V6Dataset(IterableDataset):
                             policy_kld = after_floats[3]
                             # reserved = after_floats[4]
 
-                            yield {
+                            rec = {
                                 "version": version,
                                 "input_format": input_format,
                                 "policy": torch.tensor(probs, dtype=torch.float32),
@@ -194,6 +194,9 @@ class Lc0V6Dataset(IterableDataset):
                                 "best_idx": int(best_idx),
                                 "policy_kld": float(policy_kld),
                             }
+                            # Attach the source member name for grouping in snapshot tests
+                            rec["source_member"] = m.name
+                            yield rec
 
 
 __all__ = ["Lc0V6Dataset", "LC0_V6_RECORD_SIZE"]
