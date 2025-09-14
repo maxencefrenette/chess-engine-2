@@ -31,6 +31,27 @@ _LC0_V6_STRUCT = struct.Struct(
     "I"  # reserved
 )
 
+def _rev_bits_in_byte(b: int) -> int:
+    # Reverse bit order in one byte (e.g., 0babcde... -> 0b...edcba)
+    b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4)
+    b = ((b & 0xCC) >> 2) | ((b & 0x33) << 2)
+    b = ((b & 0xAA) >> 1) | ((b & 0x55) << 1)
+    return b
+
+
+def _reverse_bits_in_bytes64(x: int) -> int:
+    """Invert lc0's ReverseBitsInBytes on a 64-bit mask.
+
+    lc0 writes each plane with ReverseBitsInBytes applied (see lc0
+    trainingdata/trainingdata.cc). We undo it here so downstream code can
+    assume square index bit 0=a1 .. 63=h8 with normal a..h file order.
+    """
+    y = 0
+    for i in range(8):
+        byte = (x >> (i * 8)) & 0xFF
+        y |= _rev_bits_in_byte(byte) << (i * 8)
+    return y
+
 
 def _read_exact(stream: io.BufferedReader, n: int) -> bytes | None:
     """Read exactly n bytes from stream; return None if EOF reached before any data."""
@@ -117,7 +138,7 @@ class Lc0V6Dataset(IterableDataset):
                             # reserved (I)
 
                             probs = rest[:1858]
-                            planes = rest[1858 : 1858 + 104]
+                            planes_raw = rest[1858 : 1858 + 104]
                             b8 = rest[1858 + 104 : 1858 + 104 + 8]
                             floats15 = rest[1858 + 104 + 8 : 1858 + 104 + 8 + 15]
                             after_floats = rest[1858 + 104 + 8 + 15 :]
@@ -161,7 +182,11 @@ class Lc0V6Dataset(IterableDataset):
                                 "version": version,
                                 "input_format": input_format,
                                 "policy": torch.tensor(probs, dtype=torch.float32),
-                                "planes": torch.tensor(planes, dtype=torch.uint64),
+                                # Undo lc0's ReverseBitsInBytes so bit 0=a1 .. 63=h8
+                                "planes": torch.tensor(
+                                    [_reverse_bits_in_bytes64(int(p)) for p in planes_raw],
+                                    dtype=torch.uint64,
+                                ),
                                 "castling": torch.tensor(
                                     [
                                         castling_us_ooo,

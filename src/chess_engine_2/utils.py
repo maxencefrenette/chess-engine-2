@@ -49,15 +49,9 @@ def _empty_board(*, chess960: bool = False) -> chess.Board:
 
 def _squares_from_bitboard(bb: int) -> Iterable[int]:
     # Enumerate squares a1=0 .. h8=63 for every set bit in bb.
-    # IMPORTANT: lc0 writes each 64‑bit plane with ReverseBitsInBytes
-    # before storing (see lc0: trainingdata/trainingdata.cc,
-    # V6TrainingDataArray::Add -> `plane = ReverseBitsInBytes(...)`).
-    # Undo that here by flipping the low 3 bits of the set index so that
-    # within each byte the bit order maps back from h..a to a..h.
     while bb:
         lsb = bb & -bb
-        idx = (lsb.bit_length() - 1)
-        idx ^= 0b111  # reverse bit order within each byte
+        idx = lsb.bit_length() - 1
         yield idx
         bb ^= lsb
 
@@ -69,7 +63,9 @@ def lc0_to_chess(sample: dict[str, torch.Tensor | int | float]) -> chess.Board:
     6 planes (PNBRQK) are interpreted as White pieces.
     """
     planes: torch.Tensor = sample["planes"]  # (104,) uint64
-    castling: torch.Tensor = sample["castling"]  # (4,) uint8 [us_ooo, us_oo, them_ooo, them_oo]
+    castling: torch.Tensor = sample[
+        "castling"
+    ]  # (4,) uint8 [us_ooo, us_oo, them_ooo, them_oo]
     input_format = int(sample["input_format"])  # 0/1 in our test set
 
     # Keep Chess960 mode enabled as requested; castling rights work for both
@@ -127,7 +123,9 @@ def lc0_to_chess(sample: dict[str, torch.Tensor | int | float]) -> chess.Board:
             # Choose the first (lowest) file bit; rank depends on side to move,
             # but since we canonicalize to White, use rank 6 (from White's POV).
             file_idx = (mask & -mask).bit_length() - 1
-            board.ep_square = chess.square(file_idx, 5)  # file, rank 6 -> index 5 (0-based)
+            board.ep_square = chess.square(
+                file_idx, 5
+            )  # file, rank 6 -> index 5 (0-based)
         else:
             board.ep_square = None
     else:
