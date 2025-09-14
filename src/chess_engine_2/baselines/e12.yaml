@@ -1,0 +1,7 @@
+batch_size: 32
+steps: 1350
+lr: 0.0005
+model_dim: 256
+intermediate_dim: 512
+layers: 8
+value_sampling_rate: 0.03
