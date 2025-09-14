@@ -28,13 +28,20 @@ WANDB_PROJECT = "chess-engine-2"
 def _normalize_policy_target(
     policy: torch.Tensor, played_idx: torch.Tensor
 ) -> torch.Tensor:
-    """Normalize policy targets; fall back to one-hot on `played_idx` if all zeros."""
-    sums = policy.sum(dim=-1, keepdim=True)
-    norm = policy / (sums + 1e-8)
-    # Fallback for zero rows
+    """Normalize policy targets; fall back to one-hot on `played_idx` if all zeros.
+
+    Notes
+    - Entries < 0 are treated as illegal and ignored (set to 0) before
+      normalization, matching the docs where illegal moves are marked with -1.
+    """
+    # Clamp negatives (illegal) to zero before normalization
+    policy_clamped = torch.clamp(policy, min=0.0)
+    sums = policy_clamped.sum(dim=-1, keepdim=True)
+    norm = policy_clamped / (sums + 1e-8)
+    # Fallback for rows with no legal mass
     zero_rows = sums.squeeze(-1) <= 1e-8
     if zero_rows.any():
-        oh = torch.zeros_like(policy)
+        oh = torch.zeros_like(policy_clamped)
         oh.scatter_(1, played_idx.view(-1, 1).long(), 1.0)
         norm[zero_rows] = oh[zero_rows]
     return norm
@@ -95,8 +102,13 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         )  # (B,1858)
         wdl_tgt = wdl_from_qd(batch["result_q"], batch["result_d"])  # (B,3)
 
+        # Mask illegal moves at the logits level wherever policy < 0
+        # This prevents illegal classes from contributing to the loss.
+        illegal_mask = batch["policy"] < 0
+        masked_policy_logits = out["policy_logits"].masked_fill(illegal_mask, -1e9)
+
         # Losses
-        policy_loss = cross_entropy_with_probs(out["policy_logits"], pol_tgt)
+        policy_loss = cross_entropy_with_probs(masked_policy_logits, pol_tgt)
         # Value loss masking: keep each sample with prob = value_sampling_rate
         B = pol_tgt.size(0)
         value_keep = (torch.rand(B, device=device) < float(hp.value_sampling_rate)).to(
