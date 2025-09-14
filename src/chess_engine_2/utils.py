@@ -35,22 +35,29 @@ import chess  # type: ignore
 import torch
 
 
+# Lc0 v6 stores the first 12 piece planes in the order
+# "PNBRQKpnbrqk" from the side-to-move perspective.
 PIECE_ORDER = "PNBRQKpnbrqk"  # indices 0..11
 
 
-def _empty_board() -> chess.Board:
+def _empty_board(*, chess960: bool = False) -> chess.Board:
     try:  # python-chess >= 1.999
-        return chess.Board.empty()  # type: ignore[attr-defined]
+        return chess.Board.empty(chess960=chess960)  # type: ignore[attr-defined]
     except Exception:
-        return chess.Board(None)  # type: ignore[arg-type]
+        return chess.Board(None, chess960=chess960)  # type: ignore[arg-type]
 
 
 def _squares_from_bitboard(bb: int) -> Iterable[int]:
     # Enumerate squares a1=0 .. h8=63 for every set bit in bb.
-    # This assumes bit 0 -> a1, which matches python-chess square indices.
+    # IMPORTANT: lc0 writes each 64‑bit plane with ReverseBitsInBytes
+    # before storing (see lc0: trainingdata/trainingdata.cc,
+    # V6TrainingDataArray::Add -> `plane = ReverseBitsInBytes(...)`).
+    # Undo that here by flipping the low 3 bits of the set index so that
+    # within each byte the bit order maps back from h..a to a..h.
     while bb:
         lsb = bb & -bb
         idx = (lsb.bit_length() - 1)
+        idx ^= 0b111  # reverse bit order within each byte
         yield idx
         bb ^= lsb
 
@@ -65,7 +72,10 @@ def lc0_to_chess(sample: dict[str, torch.Tensor | int | float]) -> chess.Board:
     castling: torch.Tensor = sample["castling"]  # (4,) uint8 [us_ooo, us_oo, them_ooo, them_oo]
     input_format = int(sample["input_format"])  # 0/1 in our test set
 
-    board = _empty_board()
+    # Keep Chess960 mode enabled as requested; castling rights work for both
+    # classical and Chess960 starts, and python-chess will interpret KQkq
+    # appropriately for non-classical back ranks.
+    board = _empty_board(chess960=True)
     board.clear_stack()  # ensure no move history
     board.turn = chess.WHITE  # canonicalize to White to move
 
@@ -135,4 +145,3 @@ def features_to_chess(*_args, **_kwargs):  # pragma: no cover - not part of this
 
 
 __all__ = ["lc0_to_chess", "features_to_chess"]
-
