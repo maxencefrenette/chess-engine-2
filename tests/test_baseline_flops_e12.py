@@ -24,7 +24,7 @@ def test_e10_baseline_training_flops_under_1e10() -> None:
     cfg_path = repo_root / "src/chess_engine_2/baselines/e12.yaml"
     hp = Hyperparameters.from_yaml(cfg_path)
 
-    per_batch_flops = MLPModel.flops_per_batch(hp, device="cpu")
+    per_batch_flops = MLPModel.flops_per_batch(hp)
     total_training_flops = per_batch_flops * hp.steps
 
     assert (
