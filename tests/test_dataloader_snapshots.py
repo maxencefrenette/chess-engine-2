@@ -62,12 +62,16 @@ def _gather_game_text(target_member: str) -> str:
             continue
         board = lc0_to_chess(sample)
         original_stm = "white" if int(sample["side_to_move_or_enpassant"]) == 0 else "black"
+        # Always show from White's perspective: if the original side to move
+        # was Black, mirror the canonical board so that actual White pieces are
+        # shown as White at the bottom in the ASCII rendering.
+        display = board if original_stm == "white" else board.mirror()
         meta = {
             "rule50": int(sample["rule50"]),
             "original_stm": original_stm,
             "input_format": int(sample["input_format"]),
         }
-        segments.append(_render_position(board, meta))
+        segments.append(_render_position(display, meta))
     assert segments, f"No samples found for member {target_member}"
     return "\n\n".join(segments)
 

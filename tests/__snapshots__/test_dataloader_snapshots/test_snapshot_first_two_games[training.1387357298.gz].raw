@@ -12,14 +12,14 @@ R N B Q K B N R
 # input_format: 1
 # ep: -
 
-r n b q k b . r
+r n b q k b n r
 p p p p p p p p
-. . . . . n . .
 . . . . . . . .
 . . . . . . . .
 . . . . . . . .
+. . . . . N . .
 P P P P P P P P
-R N B Q K B N R
+R N B Q K B . R
 # castling: KQkq
 # rule50: 1
 # original_stm: black
@@ -40,14 +40,14 @@ R N B Q K B . R
 # input_format: 1
 # ep: -
 
-r n b q k b . r
-p p p p p p . p
-. . . . . n p .
+r n b q k b n r
+p p p . p p p p
 . . . . . . . .
-. . . P . . . .
+. . . p . . . .
 . . . . . . . .
-P P P . P P P P
-R N B Q K B N R
+. . . . . N P .
+P P P P P P . P
+R N B Q K B . R
 # castling: KQkq
 # rule50: 0
 # original_stm: black
@@ -68,14 +68,14 @@ R N B Q K B . R
 # input_format: 1
 # ep: -
 
-r n b q k . . r
-p p p p p p b p
-. . . . . n p .
+r n b q k b n r
+p p p . p p . p
+. . . . . . p .
+. . . p . . . .
 . . . . . . . .
-. . . P . . . .
-. . . . . . P .
-P P P . P P . P
-R N B Q K B N R
+. . . . . N P .
+P P P P P P B P
+R N B Q K . . R
 # castling: KQkq
 # rule50: 1
 # original_stm: black
@@ -96,14 +96,14 @@ R N B Q K . . R
 # input_format: 1
 # ep: -
 
-r n b q k . . r
-p p . p p p b p
+r n b q k b . r
+p p p . p p . p
 . . . . . n p .
-. . p . . . . .
-. . . P . . . .
+. . . p . . . .
+. . P . . . . .
 . . . . . N P .
-P P P . P P . P
-R N B Q K B . R
+P P . P P P B P
+R N B Q K . . R
 # castling: KQkq
 # rule50: 0
 # original_stm: black
@@ -124,14 +124,14 @@ R N B Q K . . R
 # input_format: 1
 # ep: -
 
-r n b . k . . r
-p p q p p p b p
+r n b q k b . r
+p p p . p p . p
 . . . . . n p .
-. . P . . . . .
 . . . . . . . .
+. . p . . . . .
 . . . . . N P .
-P P P . P P . P
-R N B Q K B . R
+P P Q P P P B P
+R N B . K . . R
 # castling: KQkq
 # rule50: 1
 # original_stm: black
@@ -152,14 +152,14 @@ R N B . K . . R
 # input_format: 1
 # ep: -
 
-r n b . k . . r
-p p . p p p b p
+r n b q k . . r
+p p p . p p b p
 . . . . . n p .
-. . q . . . . .
 . . . . . . . .
+. . Q . . . . .
 . . . . . N P .
-P P P . P P B P
-R N B Q K . . R
+P P . P P P B P
+R N B . K . . R
 # castling: KQkq
 # rule50: 0
 # original_stm: black
@@ -180,15 +180,15 @@ R N B . K . . R
 # input_format: 1
 # ep: -
 
-r n b . . r k .
-p p . p p p b p
-. . . . . n p .
-. . q . . . . .
+r . b q k . . r
+p p p . p p b p
+. . n . . n p .
 . . . . . . . .
-. . N . . N P .
-P P P . P P B P
-R . B Q K . . R
-# castling: KQ
+. . Q . . . . .
+. . . . . N P .
+P P . P P P B P
+R N B . . R K .
+# castling: kq
 # rule50: 2
 # original_stm: black
 # input_format: 1
@@ -208,15 +208,15 @@ R N B . . R K .
 # input_format: 1
 # ep: -
 
-r . b . . r k .
-p p . p p p b p
-. . n . . n p .
-. . q . . . . .
-. . . N . . . .
-. . N . . . P .
-P P P . P P B P
-R . B Q K . . R
-# castling: KQ
+r . b q k . . r
+p p p . p p b p
+. . n . . . p .
+. . . n . . . .
+. . Q . . . . .
+. . N . . N P .
+P P . P P P B P
+R . B . . R K .
+# castling: kq
 # rule50: 4
 # original_stm: black
 # input_format: 1
@@ -236,15 +236,15 @@ R . B . . R K .
 # input_format: 1
 # ep: -
 
-r . b . . r k .
-p p . p p p b p
-. . n . . n p .
-. . . . . . . q
+r . b q k . . r
+p p p . p p b p
+. n n . . . p .
 . . . . . . . .
-. N N . . . P .
-P P P . P P B P
-R . B Q K . . R
-# castling: KQ
+. . . . . . . Q
+. . N . . N P .
+P P . P P P B P
+R . B . . R K .
+# castling: kq
 # rule50: 6
 # original_stm: black
 # input_format: 1
@@ -264,14 +264,14 @@ R . B . . R K .
 # input_format: 1
 # ep: -
 
-r . b . . r k .
-p p . . p p b p
-. . n p . n p .
-. . . . . . . q
+r . b q . r k .
+p p p . p p b p
+. n n . . . p .
 . . . . . . . .
-. N N . . . P .
-P P P . P P B P
-R . B Q . R K .
+. . . . . . . Q
+. . N P . N P .
+P P . . P P B P
+R . B . . R K .
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -292,14 +292,14 @@ R . B . . R K .
 # input_format: 1
 # ep: -
 
-r . b . . r k .
-. p . . p p b p
-. . n p . n p .
-p . . . . . . q
-. . . . P . . .
-. N N . . . P .
-P P P . . P B P
-R . B Q . R K .
+r . b q . r k .
+p p p . . p b p
+. n n . . . p .
+. . . . p . . .
+P . . . . . . Q
+. . N P . N P .
+. P . . P P B P
+R . B . . R K .
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -321,12 +321,12 @@ R . B . . R K .
 # ep: -
 
 r . b . . r k .
-. p . . p p b p
-. . n p . n . .
-p . . . . . . p
-. . . . P . . .
-. N N . . . P .
-P P P . . P B P
+p p p . . p b p
+. n n . . . p .
+. . . . p . . .
+P . . . . . . P
+. . N P . N . .
+. P . . P P B P
 R . B . . R K .
 # castling: -
 # rule50: 0
@@ -348,14 +348,14 @@ R . B . . R K .
 # input_format: 1
 # ep: -
 
-r . . . . r k .
-. p . . p p b p
-. . n p b n . .
-p . . . . . . p
-P . . . P . . .
-. N N . . . P .
-. P P . . P B P
-R . B . . R K .
+r . b . . r k .
+. p p . . p b p
+. n n . . . p .
+p . . . p . . .
+P . . . . . . P
+. . N P B N . .
+. P . . P P B P
+R . . . . R K .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -376,14 +376,14 @@ R . . . . R K .
 # input_format: 1
 # ep: -
 
-r . . . . r k .
-. p . . p p b p
-. . n p b n . .
-p . . N . . . .
-P . . . P . . p
-. N . . . . P .
-. P P . . P B P
-R . B . . R K .
+r . b . . r k .
+. p p . . p b p
+. n . . . . p .
+p . . . p . . P
+P . . n . . . .
+. . N P B N . .
+. P . . P P B P
+R . . . . R K .
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -404,14 +404,14 @@ R . . . . R K .
 # input_format: 1
 # ep: -
 
-. r . . . r k .
-. p . . p p b p
-. . n p b n . .
-p . . N . . . .
-P . . . P . . P
-. N . . . . . .
-. P P . . P B P
-R . B . . R K .
+r . b . . r k .
+. p p . . p b p
+. n . . . . . .
+p . . . p . . p
+P . . n . . . .
+. . N P B N . .
+. P . . P P B P
+. R . . . R K .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -432,14 +432,14 @@ P . . n . . . .
 # input_format: 1
 # ep: -
 
-. r . . . r . k
-. p . . p p b p
-. . n p b n . .
-p . . N . . . .
-P . . . P P . P
-. N . . . . . .
-. P P . . . B P
-R . B . . R K .
+r . b . . r k .
+. p p . . . b p
+. n . . . . . .
+p . . . p p . p
+P . . n . . . .
+. . N P B N . .
+. P . . P P B P
+. R . . . R . K
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -460,14 +460,14 @@ P . . n . . . .
 # input_format: 1
 # ep: -
 
-. r . . . r . k
-. p . . p p b p
-. . . p b n . .
-p . . N . . . .
-P n . . P P . P
-. N . . . . . .
-. P P B . . B P
-R . . . . R K .
+r . . . . r k .
+. p p b . . b p
+. n . . . . . .
+p N . . p p . p
+P . . n . . . .
+. . . P B N . .
+. P . . P P B P
+. R . . . R . K
 # castling: -
 # rule50: 3
 # original_stm: black
@@ -488,14 +488,14 @@ P . . . . . . .
 # input_format: 1
 # ep: -
 
-. r . . . r . k
-. p . . p p b p
-. . . p b n . .
+r . . . . r k .
+. p p b . . b p
+. n . . . . . .
+p P . . p p . p
 . . . . . . . .
-P p . . P P . P
-. N . . . . . .
-. P P B . . B P
-R . . . . R K .
+. . . P B N . .
+. P . . P P B P
+. R . . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -516,14 +516,14 @@ p P . . . p . p
 # input_format: 1
 # ep: -
 
-. r . . . r . k
-. p . . p p b p
-. . . . b n . .
-. . . . p . . .
-P p . . . P . P
-. N . . . . . .
-. P P B . . B P
-R . . . . R K .
+r . . . . r k .
+. p p b . . b p
+. n . . . . . .
+p P . . . p . p
+. . . . P . . .
+. . . . B N . .
+. P . . P P B P
+. R . . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -544,14 +544,14 @@ p P . . . . . p
 # input_format: 1
 # ep: -
 
-. r . . . r . k
-. p . . p p b p
-. . . . b . . .
-. . . . P . . .
-P p . . . . n P
-. N . . . . . .
-. P P B . . B P
-R . . . . R K .
+r . . . . r k .
+. p p b . . b p
+. n . . . . . .
+p P . . . . N p
+. . . . p . . .
+. . . . B . . .
+. P . . P P B P
+. R . . . R . K
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -572,14 +572,14 @@ p P . . . . N p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . . p p b p
-. . . . b . . .
-. . . . P . . .
-P p . . . . n P
-. N . . . . . .
-. P P B . . B P
-. . . . R R K .
+. . . . r r k .
+. p p b . . b p
+. n . . . . . .
+p P . . . . N p
+. . . . p . . .
+. . . . B . . .
+. P . . P P B P
+. . R . . R . K
 # castling: -
 # rule50: 3
 # original_stm: black
@@ -600,14 +600,14 @@ p P . n . . N p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . . p p . p
-. . . . b . . .
-. . . . b . . .
-P p . N . . n P
+. . . . r r k .
+. p p b . . b p
 . . . . . . . .
-. P P B . . B P
-. . . . R R K .
+p P . n . . N p
+. . . . B . . .
+. . . . B . . .
+. P . . P P . P
+. . R . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -628,14 +628,14 @@ p P . n . . N p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . . p p . p
-. . . . b . . .
-. . . . n . . .
-P p . N . . . P
+. . . . . r k .
+. p p b . . b p
 . . . . . . . .
-. P P B . . B P
-. . . . . R K .
+p P . n . . . p
+. . . . N . . .
+. . . . B . . .
+. P . . P P . P
+. . R . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -656,14 +656,14 @@ p b . n . . . p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . . p p . p
+. . . . . r k .
+. p p . . . b p
 . . . . . . . .
-. . . . n . . .
-P B b N . . . P
+p b B n . . . p
+. . . . N . . .
 . . . . . . . .
-. P P . . . B P
-. . . . . R K .
+. P . . P P . P
+. . R . . R . K
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -684,14 +684,14 @@ p b B n . . . p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . . p . . p
-. . . . . p . .
-. . . . n . . .
-P B b N . . . P
+. . . . r . k .
+. p p . . . b p
 . . . . . . . .
-. P P . . . B P
-. . . . R . K .
+p b B n . . . p
+. . . . N . . .
+. . . . . P . .
+. P . . P . . P
+. . R . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -712,14 +712,14 @@ p b B n . . . p
 # input_format: 1
 # ep: -
 
-. . r . . r b k
-. p . . p . . p
-. . . . . p . .
-. . . . n . . .
-P B . N . . . P
-. P . . . . . .
-. . P . . . B P
-. . . . R . K .
+. . . . r . k .
+. . p . . . b p
+. p . . . . . .
+p b . n . . . p
+. . . . N . . .
+. . . . . P . .
+. P . . P . . P
+. . R . . R B K
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -740,14 +740,14 @@ b . . . N . . .
 # input_format: 1
 # ep: -
 
-. r . . . r b k
-. p . . p . . p
-. . . . . p . .
-B . . . n . . .
-P . . N . . . P
-. P . . . . . .
-. . P . . . B P
-. . . . R . K .
+. . . . r . k .
+. . p . . . b p
+. p . . . . . .
+p . . n . . . p
+b . . . N . . .
+. . . . . P . .
+. P . . P . . P
+. R . . . R B K
 # castling: -
 # rule50: 3
 # original_stm: black
@@ -768,14 +768,14 @@ p . . n . . . p
 # input_format: 1
 # ep: -
 
-. r . . . r . k
-. p . . p b . p
-. B . . . p . .
-. . . . n . . .
-P . . N . . . P
-. P . . . . . .
-. . P . . . B P
-. . . . R . K .
+. . . . r . k .
+. . p . . . b p
+. p . . . . . .
+p . . n . . . p
+. . . . N . . .
+. b . . . P . .
+. P . . P B . P
+. R . . . R . K
 # castling: -
 # rule50: 5
 # original_stm: black
@@ -796,14 +796,14 @@ p . . n . . . p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . . p b . p
-. B . . . p . .
-. . . . n . . .
-P . . N . . . P
-. P . . . . . .
-. . P . . K B P
-. . . . R . . .
+. . . . r . . .
+. . p . . k b p
+. p . . . . . .
+p . . n . . . p
+. . . . N . . .
+. b . . . P . .
+. P . . P B . P
+. . R . . R . K
 # castling: -
 # rule50: 7
 # original_stm: black
@@ -824,14 +824,14 @@ p . . n . . . p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . n p b . p
-. B . . . p . .
 . . . . . . . .
-P . . N . . . P
-. P . . . . . .
-. . P . R K B P
+. . p . r k b p
+. p . . . . . .
+p . . n . . . p
 . . . . . . . .
+. b . . . P . .
+. P . N P B . P
+. . R . . R . K
 # castling: -
 # rule50: 9
 # original_stm: black
@@ -852,14 +852,14 @@ b . . . . . . .
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. p . n . b . p
-. . . . . p . .
-B . . . p . . .
-P . . N . . . P
-. P . . . . . .
-. . P . R K B P
 . . . . . . . .
+. . p . r k b p
+. p . . . . . .
+p . . n . . . p
+b . . . P . . .
+. . . . . P . .
+. P . N . B . P
+. . R . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -880,14 +880,14 @@ b n . . P . . .
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. . . n . b . p
-. p . . . p . .
-B N . . p . . .
-P . . . . . . P
-. P . . . . . .
-. . P . R K B P
 . . . . . . . .
+. . p . r k b p
+. p . . . . . .
+p . . . . . . p
+b n . . P . . .
+. P . . . P . .
+. . . N . B . P
+. . R . . R . K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -908,14 +908,14 @@ p b . . . . . p
 # input_format: 1
 # ep: -
 
-. . r . . r . k
-. . . . . b . p
-. p . . . p . .
-. N n . p . . .
-P B . . . . . P
-. P . . . . . .
-. . P . R K B P
 . . . . . . . .
+. . p . r k b p
+. p . . . . . .
+p b . . . . . p
+. n N . P . . .
+. P . . . P . .
+. . . . . B . P
+. . R . . R . K
 # castling: -
 # rule50: 2
 # original_stm: black
@@ -936,14 +936,14 @@ p b . . . . . p
 # input_format: 1
 # ep: -
 
-. . . . . r . k
-. . r . . b . p
-. p . N . p . .
-. . n . p . . .
-P B . . . . . P
-. P . . . . . .
-. . P . R K B P
 . . . . . . . .
+. . p . r k b p
+. p . . . . . .
+p b . . . . . p
+. . N . P . . .
+. P . n . P . .
+. . R . . B . P
+. . . . . R . K
 # castling: -
 # rule50: 4
 # original_stm: black
@@ -964,14 +964,14 @@ p b . . . . . p
 # input_format: 1
 # ep: -
 
-. . . . . r . k
-. . r . . . . p
-. p . N . p b .
-. . n . p . . .
-P B . . . . . P
-. P . . . . . .
-. . P R . K B P
 . . . . . . . .
+. . p r . k b p
+. p . . . . . .
+p b . . . . . p
+. . N . P . . .
+. P . n . P B .
+. . R . . . . P
+. . . . . R . K
 # castling: -
 # rule50: 6
 # original_stm: black
@@ -992,14 +992,14 @@ p b . . . . . p
 # input_format: 1
 # ep: -
 
-. . . . . r . k
-. . . . . . r p
-. p . . . p b .
-. N n . p . . .
-P B . . . . . P
-. P . . . . . .
-. . P R . K B P
 . . . . . . . .
+. . p r . k b p
+. p . . . . . .
+p b . . . . . p
+. n N . P . . .
+. P . . . P B .
+. . . . . . R P
+. . . . . R . K
 # castling: -
 # rule50: 8
 # original_stm: black
@@ -1020,14 +1020,14 @@ p n N . P . . .
 # input_format: 1
 # ep: -
 
-. . . . . . r k
-. . . . . . r p
-. p . . . p b .
-P N n . p . . .
-. B . . . . . P
-. P . . . . . .
-. . P R . K B P
 . . . . . . . .
+. . p r . k b p
+. p . . . . . .
+. b . . . . . p
+p n N . P . . .
+. P . . . P B .
+. . . . . . R P
+. . . . . . R K
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1048,14 +1048,14 @@ p n b . P . . .
 # input_format: 1
 # ep: -
 
-. . . . . . r k
-. . . . . . r p
-. . . . . p b .
-P N p . p . . .
-. . . . . . . P
-. P . . . . . .
-. . P R . K B P
 . . . . . . . .
+. . p r . k b p
+. p . . . . . .
+. . . . . . . p
+p n P . P . . .
+. . . . . P B .
+. . . . . . R P
+. . . . . . R K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1076,14 +1076,14 @@ p n P b P . . .
 # input_format: 1
 # ep: -
 
-. . . . . . r k
-. . . . . b r p
-. . . . . p . .
-P N p B p . . .
-. . . . . . . P
-. P . . . . . .
-. . P R . K . P
 . . . . . . . .
+. . p r . k . p
+. p . . . . . .
+. . . . . . . p
+p n P b P . . .
+. . . . . P . .
+. . . . . B R P
+. . . . . . R K
 # castling: -
 # rule50: 2
 # original_stm: black
@@ -1104,14 +1104,14 @@ p n P . P . . .
 # input_format: 1
 # ep: -
 
-. . . . . . r k
-. . . . . r . p
-. . . . . p . .
-P N p . p . . .
-. . . . . . . P
-. P . . . . . .
-. . P R . K . P
 . . . . . . . .
+. . p r . k . p
+. p . . . . . .
+. . . . . . . p
+p n P . P . . .
+. . . . . P . .
+. . . . . R . P
+. . . . . . R K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1132,14 +1132,14 @@ p . . . . P . .
 # input_format: 1
 # ep: -
 
-. . . . . . r k
-. . . . . r . p
-P . . . . . . .
-. N p . p p . .
-. . . . . . . P
-. P . . . . . .
-. . P R . K . P
 . . . . . . . .
+. . p r . k . p
+. p . . . . . .
+. . . . . . . p
+. n P . P P . .
+p . . . . . . .
+. . . . . R . P
+. . . . . . R K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1160,14 +1160,14 @@ p . . . . . . .
 # input_format: 1
 # ep: -
 
-. . . . . . r k
-. . . . . r . p
-P . . . . . . .
-. N p R . p . .
-. . . . p . . P
-. P . . . . . .
-. . P . . K . P
 . . . . . . . .
+. . p . . k . p
+. p . . . . . .
+. . . . P . . p
+. n P r . P . .
+p . . . . . . .
+. . . . . R . P
+. . . . . . R K
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1188,14 +1188,14 @@ p . . . . . . .
 # input_format: 1
 # ep: -
 
-. . . . . r . k
-. . . . . r . p
-P . . . . . . .
-. N p . R p . .
-. . . . p . . P
-. P . . . . . .
-. . P . . K . P
 . . . . . . . .
+. . p . . k . p
+. p . . . . . .
+. . . . P . . p
+. n P . r P . .
+p . . . . . . .
+. . . . . R . P
+. . . . . R . K
 # castling: -
 # rule50: 2
 # original_stm: black
@@ -1216,14 +1216,14 @@ p . . . . R . P
 # input_format: 1
 # ep: -
 
-. . . . . r . .
-P . . . . r k p
 . . . . . . . .
-. N p . R p . .
-. . . . p . . P
-. P . . . . . .
-. . P . . K . P
+. . p . . k . p
+. p . . . . . .
+. . . . P . . p
+. n P . r P . .
 . . . . . . . .
+p . . . . R K P
+. . . . . R . .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1244,14 +1244,14 @@ p . . . . R K P
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . r k p
 . . . . . . . .
-. N R . . p . .
-. . . . p . . P
-. P . . . . . .
-. . P . . K . P
+. . p . . k . p
+. p . . . . . .
+. . . . P . . p
+. n r . . P . .
 . . . . . . . .
+p . . . . R K P
+R . . . . . . .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1272,14 +1272,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . r . p
-. . . . . . k .
-. N R . . p . .
-. P . . p . . P
 . . . . . . . .
-. . P . . K . P
+. . p . . k . p
 . . . . . . . .
+. p . . P . . p
+. n r . . P . .
+. . . . . . K .
+p . . . . R . P
+R . . . . . . .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1300,14 +1300,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . r . . . p
-. . . . . . k .
-. N R . . p . .
-. P P . p . . P
 . . . . . . . .
-. . . . . K . P
+. . . . . k . p
 . . . . . . . .
+. p p . P . . p
+. n r . . P . .
+. . . . . . K .
+p . . R . . . P
+R . . . . . . .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1328,14 +1328,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . . . p
-. . . . . . k .
-. N . r . p . .
-. P P . p . . P
 . . . . . . . .
-. . . . . K . P
+. . . . . k . p
 . . . . . . . .
+. p p . P . . p
+. n . R . P . .
+. . . . . . K .
+p . . . . . . P
+R . . . . . . .
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1356,14 +1356,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . k . p
 . . . . . . . .
-. N . P . p . .
-. P . . p . . P
+. . . . . k . p
 . . . . . . . .
-. . . . . K . P
+. p . . P . . p
+. n . p . P . .
 . . . . . . . .
+p . . . . K . P
+R . . . . . . .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1384,14 +1384,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . . . p
-. . . N . k . .
-. . . P . p . .
-. P . . p . . P
 . . . . . . . .
-. . . . . K . P
+. . . . . k . p
 . . . . . . . .
+. p . . P . . p
+. . . p . P . .
+. . . n . K . .
+p . . . . . . P
+R . . . . . . .
 # castling: -
 # rule50: 3
 # original_stm: black
@@ -1412,14 +1412,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . k . . p
 . . . . . . . .
-. N . P . p . .
-. P . . p . . P
+. . . . . k . p
 . . . . . . . .
-. . . . . K . P
+. p . . P . . p
+. n . p . P . .
 . . . . . . . .
+p . . . K . . P
+R . . . . . . .
 # castling: -
 # rule50: 5
 # original_stm: black
@@ -1440,14 +1440,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . k . . . .
-P . . . . . . p
 . . . . . . . .
-. N . P . p . .
-. P . . p . . P
-. . . . K . . .
-. . . . . . . P
+. . . . . . . p
+. . . . k . . .
+. p . . P . . p
+. n . p . P . .
 . . . . . . . .
+p . . . . . . P
+R . . K . . . .
 # castling: -
 # rule50: 7
 # original_stm: black
@@ -1468,14 +1468,14 @@ R . . K . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . k . . . p
 . . . . . . . .
-. . . P . p . .
-. P . N p . . P
-. . . . K . . .
-. . . . . . . P
+. . . . . . . p
+. . . . k . . .
+. p . n P . . p
+. . . p . P . .
 . . . . . . . .
+p . . K . . . P
+R . . . . . . .
 # castling: -
 # rule50: 9
 # original_stm: black
@@ -1496,14 +1496,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . . . p
-. . N k . . . .
-. . . P . p . .
-. P . . p . . P
-. . . . K . . .
-. . . . . . . P
 . . . . . . . .
+. . . . . . . p
+. . . . k . . .
+. p . . P . . p
+. . . p . P . .
+. . n K . . . .
+p . . . . . . P
+R . . . . . . .
 # castling: -
 # rule50: 11
 # original_stm: black
@@ -1524,14 +1524,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . . . p
-. . N k . . . .
-. . . P . p . .
-. P . K . . . P
-. . . . p . . .
-. . . . . . . P
 . . . . . . . .
+. . . . . . . p
+. . . . P . . .
+. p . k . . . p
+. . . p . P . .
+. . n K . . . .
+p . . . . . . P
+R . . . . . . .
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1552,14 +1552,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . . . . p
-. . N . . . . .
-. . . k . p . .
-. P . . . . . P
-. . . . K . . .
-. . . . . . . P
 . . . . . . . .
+. . . . . . . p
+. . . . k . . .
+. p . . . . . p
+. . . K . P . .
+. . n . . . . .
+p . . . . . . P
+R . . . . . . .
 # castling: -
 # rule50: 0
 # original_stm: black
@@ -1580,14 +1580,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . N . . p
-. . . k . . . .
-. . . . . p . .
-. P . . . . . P
-. . . . K . . .
-. . . . . . . P
 . . . . . . . .
+. . . . . . . p
+. . . . k . . .
+. p . . . . . p
+. . . . . P . .
+. . . K . . . .
+p . . . n . . P
+R . . . . . . .
 # castling: -
 # rule50: 2
 # original_stm: black
@@ -1608,14 +1608,14 @@ R . . . . . . .
 # input_format: 1
 # ep: -
 
-r . . . . . . .
-P . . . N . . p
 . . . . . . . .
-. P k . . p . .
-. . . . . . . P
-. . . . K . . .
-. . . . . . . P
+. . . . . . . p
+. . . . k . . .
+. . . . . . . p
+. p K . . P . .
 . . . . . . . .
+p . . . n . . P
+R . . . . . . .
 # castling: -
 # rule50: 1
 # original_stm: black
@@ -1637,12 +1637,12 @@ R . . . . . . .
 # ep: -
 
 . . . . . . . .
-r . . . N . . p
+. . . . . . . p
 . . . . . . . .
-. P k . . p . .
-. . . . . K . P
+. . . . . k . p
+. p K . . P . .
 . . . . . . . .
-. . . . . . . P
+R . . . n . . P
 . . . . . . . .
 # castling: -
 # rule50: 0
@@ -1665,12 +1665,12 @@ R . . . . . . P
 # ep: -
 
 . . . . . . . .
-r . . . . . . p
+. . . . . . . p
 . . . . . . . .
-. k . . . N . .
-. . . . . K . P
+. . . . . k . p
+. K . . . n . .
 . . . . . . . .
-. . . . . . . P
+R . . . . . . P
 . . . . . . . .
 # castling: -
 # rule50: 0
@@ -1693,12 +1693,12 @@ R . . . . . . P
 # ep: -
 
 . . . . . . . .
-r . . . . . . p
-. . k . . . . .
-. . . . K N . .
-. . . . . . . P
+. . . . . . . p
 . . . . . . . .
-. . . . . . . P
+. . . . . . . p
+. . . . k n . .
+. . K . . . . .
+R . . . . . . P
 . . . . . . . .
 # castling: -
 # rule50: 2
@@ -1721,12 +1721,12 @@ R . . . . . . P
 # ep: -
 
 . . . . . . . .
-. . . . . . . p
-. . k . K . . .
-. . . . . N . .
-. . . . . . . P
+R . . . . . . p
 . . . . . . . .
-r . . . . . . P
+. . . . . . . p
+. . . . . n . .
+. . K . k . . .
+. . . . . . . P
 . . . . . . . .
 # castling: -
 # rule50: 4
@@ -1749,12 +1749,12 @@ R . . . . . . p
 # ep: -
 
 . . . . . . . .
-. . k . . . . p
-. . . . K . . .
-. . . . . N . P
+R . . . . . . p
 . . . . . . . .
 . . . . . . . .
-r . . . . . . P
+. . . . . n . p
+. . . . k . . .
+. . K . . . . P
 . . . . . . . .
 # castling: -
 # rule50: 1
@@ -1777,12 +1777,12 @@ R . . . . . . p
 # ep: -
 
 . . . . . . . .
-. . k . N . . p
-. . . . K . . .
-. . . . . . . P
+. . . . R . . p
 . . . . . . . .
 . . . . . . . .
-. . . . r . . P
+. . . . . . . p
+. . . . k . . .
+. . K . n . . P
 . . . . . . . .
 # castling: -
 # rule50: 3
@@ -1805,12 +1805,12 @@ R . . . . . . p
 # ep: -
 
 . . . . . . . .
-. . . . N K . p
-. . . k . . . .
-. . . . . . . P
+. . . . R . . p
 . . . . . . . .
 . . . . . . . .
-. . . . r . . P
+. . . . . . . p
+. . . K . . . .
+. . . . n k . P
 . . . . . . . .
 # castling: -
 # rule50: 5
@@ -1832,14 +1832,14 @@ R . . . . . . p
 # input_format: 1
 # ep: -
 
-. . . . . . N .
-. . . . . K . p
-. . . k . . . .
-. . . . . . . P
+. . . . . . . .
+R . . . . . . p
 . . . . . . . .
 . . . . . . . .
-r . . . . . . P
-. . . . . . . .
+. . . . . . . p
+. . . K . . . .
+. . . . . k . P
+. . . . . . n .
 # castling: -
 # rule50: 7
 # original_stm: black
