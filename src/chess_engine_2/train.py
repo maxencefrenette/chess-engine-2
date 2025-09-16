@@ -8,6 +8,7 @@ import torch
 import wandb
 from dotenv import load_dotenv
 from torch.utils.data import DataLoader
+from torchdata.datapipes.iter import IterableWrapper, Shuffler
 
 from .dataloader import Lc0V6Dataset
 from .hyperparameters import Hyperparameters
@@ -73,7 +74,9 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
 
     data_dir = _resolve_training_data_path()
     ds = Lc0V6Dataset(data_dir)
-    dl = DataLoader(ds, batch_size=hp.batch_size, num_workers=0)
+    datapipe = IterableWrapper(ds)
+    datapipe = Shuffler(datapipe, buffer_size=hp.shuffle_buffer_size)
+    dl = DataLoader(datapipe, batch_size=hp.batch_size, num_workers=0)
 
     model = MLPModel(hp).to(device)
     opt = torch.optim.SGD(model.parameters(), lr=hp.lr)

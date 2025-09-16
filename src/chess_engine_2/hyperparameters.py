@@ -24,6 +24,7 @@ class Hyperparameters(BaseModel):
     intermediate_dim: int = Field(gt=0)
     layers: int = Field(gt=0)
     value_sampling_rate: float = Field(ge=0.0, le=1.0)
+    shuffle_buffer_size: int = Field(gt=0)
 
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> Hyperparameters:
