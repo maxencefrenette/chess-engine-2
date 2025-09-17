@@ -13,6 +13,7 @@ from chess_engine_2.model import MLPModel
     [
         ("e12", 1e12),
         ("e13", 1e13),
+        ("e14", 1e14),
     ],
 )
 def test_baseline_training_flops_within_budget(
@@ -36,9 +37,7 @@ def test_baseline_training_flops_within_budget(
     per_batch_flops = MLPModel.flops_per_batch(hp)
     total_training_flops = per_batch_flops * hp.steps
 
-    assert (
-        total_training_flops < flop_budget
-    ), (
+    assert total_training_flops < flop_budget, (
         f"Total FLOPs {total_training_flops:.2e} exceeds {flop_budget:.0e}"
         f" for {baseline_name}.yaml"
     )

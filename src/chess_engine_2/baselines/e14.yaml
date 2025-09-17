@@ -1,0 +1,9 @@
+batch_size: 64
+steps: 195212
+lr: 0.00055
+lr_cooldown_frac: 0.2
+model_dim: 128
+intermediate_dim: 256
+layers: 10
+value_sampling_rate: 1
+shuffle_buffer_size: 20000
