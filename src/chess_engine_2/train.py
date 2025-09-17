@@ -88,6 +88,9 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         dir=Path(os.environ["WANDB_PATH"]).expanduser(),
     )
 
+    per_batch_flops = MLPModel.flops_per_batch(hp)
+    cumulative_flops = 0
+
     step = 0
     last = {"loss": 0.0, "policy": 0.0, "value": 0.0}
     for batch in dl:
@@ -126,19 +129,21 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         loss.backward()
         opt.step()
 
+        cumulative_flops += per_batch_flops
+
         last = {
             "loss": float(loss.detach().cpu()),
             "policy": float(policy_loss.detach().cpu()),
             "value": float(value_loss.detach().cpu()),
+            "flops": cumulative_flops,
         }
-        if wandb_run is not None:
-            wandb_run.log(last, step=step)
+
+        wandb_run.log(last, step=step)
         step += 1
         if step >= hp.steps:
             break
 
-    if wandb_run is not None:
-        wandb_run.finish()
+    wandb_run.finish()
 
     return last
 
