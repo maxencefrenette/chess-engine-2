@@ -20,6 +20,7 @@ class Hyperparameters(BaseModel):
     batch_size: int = Field(gt=0)
     steps: int = Field(gt=0)
     lr: float = Field(gt=0)
+    lr_cooldown_frac: float = Field(default=0.0, ge=0.0, le=1.0)
     model_dim: int = Field(gt=0)
     intermediate_dim: int = Field(gt=0)
     layers: int = Field(gt=0)

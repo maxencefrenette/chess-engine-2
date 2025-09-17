@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import os
 import sys
 from pathlib import Path
@@ -24,6 +25,20 @@ ROOT = Path(__file__).resolve()
 load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
 WANDB_PROJECT = "chess-engine-2"
+
+
+def get_lr(hp: Hyperparameters, step: int) -> float:
+    """Piecewise-linear learning rate schedule with an optional cooldown."""
+    progress = step / hp.steps
+    assert 0 <= progress < 1
+
+    if progress < 1 - hp.lr_cooldown_frac:
+        multiplier = 1.0
+    else:
+        decay = (1 - progress) / hp.lr_cooldown_frac
+        multiplier = decay * 1.0 + (1 - decay) * 0.1
+
+    return hp.lr * multiplier
 
 
 def _normalize_policy_target(
@@ -79,7 +94,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     dl = DataLoader(datapipe, batch_size=hp.batch_size, num_workers=0)
 
     model = MLPModel(hp).to(device)
-    opt = torch.optim.SGD(model.parameters(), lr=hp.lr)
+    opt = torch.optim.SGD(model.parameters(), lr=get_lr(hp, 0))
 
     wandb_run = wandb.init(
         project=WANDB_PROJECT,
@@ -125,6 +140,10 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         )
         loss = policy_loss + value_loss
 
+        current_lr = get_lr(hp, step)
+        for group in opt.param_groups:
+            group["lr"] = current_lr
+
         opt.zero_grad(set_to_none=True)
         loss.backward()
         opt.step()
@@ -136,6 +155,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
             "policy": float(policy_loss.detach().cpu()),
             "value": float(value_loss.detach().cpu()),
             "flops": cumulative_flops,
+            "lr": current_lr,
         }
 
         wandb_run.log(last, step=step)
