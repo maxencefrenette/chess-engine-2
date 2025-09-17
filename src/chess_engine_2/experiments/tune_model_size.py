@@ -11,7 +11,7 @@ from chess_engine_2.train import train
 def main() -> None:
     """Run three training jobs that vary model width while matching total FLOPs.
 
-    Usage: uv run python -m chess_engine_2.experiments.tune_model_size <baseline>
+    Usage: uv run src/chess_engine_2/experiments/tune_model_size.py <baseline>
     """
 
     if len(sys.argv) < 2:
