@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.flop_counter import FlopCounterMode
 
 from .hyperparameters import Hyperparameters
 
@@ -188,15 +189,6 @@ class MLPModel(nn.Module):
     @staticmethod
     def flops_per_batch(hp: Hyperparameters) -> int:
         """Estimate per‑batch FLOPs when training with given hyperparameters."""
-        # Import locally to avoid a hard import requirement for callers that
-        # don't use FLOP counting.
-        try:
-            from torch.utils.flop_counter import FlopCounterMode  # type: ignore
-        except Exception as exc:  # pragma: no cover - environment dependent
-            raise RuntimeError(
-                "torch.utils.flop_counter is unavailable in this environment."
-            ) from exc
-
         with torch.device("meta"):
             model = MLPModel(hp)
             model.train()
