@@ -31,6 +31,7 @@ _LC0_V6_STRUCT = struct.Struct(
     "I"  # reserved
 )
 
+
 def _rev_bits_in_byte(b: int) -> int:
     # Reverse bit order in one byte (e.g., 0babcde... -> 0b...edcba)
     b = ((b & 0xF0) >> 4) | ((b & 0x0F) << 4)
@@ -182,9 +183,11 @@ class Lc0V6Dataset(IterableDataset):
                                 "version": version,
                                 "input_format": input_format,
                                 "policy": torch.tensor(probs, dtype=torch.float32),
-                                # Undo lc0's ReverseBitsInBytes so bit 0=a1 .. 63=h8
                                 "planes": torch.tensor(
-                                    [_reverse_bits_in_bytes64(int(p)) for p in planes_raw],
+                                    [
+                                        _reverse_bits_in_bytes64(int(p))
+                                        for p in planes_raw
+                                    ],
                                     dtype=torch.uint64,
                                 ),
                                 "castling": torch.tensor(
@@ -196,7 +199,9 @@ class Lc0V6Dataset(IterableDataset):
                                     ],
                                     dtype=torch.uint8,
                                 ),
-                                "side_to_move_or_enpassant": int(side_to_move_or_enpassant),
+                                "side_to_move_or_enpassant": int(
+                                    side_to_move_or_enpassant
+                                ),
                                 "rule50": int(rule50_count),
                                 "invariance_info": int(invariance_info),
                                 "root_q": float(root_q),
