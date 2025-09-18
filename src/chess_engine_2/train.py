@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import math
 import os
 import sys
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 import wandb
 from dotenv import load_dotenv
 from torch.utils.data import DataLoader
@@ -15,7 +15,6 @@ from .dataloader import Lc0V6Dataset
 from .hyperparameters import Hyperparameters
 from .model import (
     MLPModel,
-    cross_entropy_with_probs,
     lc0_to_features,
     wdl_from_qd,
 )
@@ -69,6 +68,46 @@ def resolve_training_data_path() -> Path:
     return Path(expanded)
 
 
+def init_torch_backend():
+    """Pick the best available PyTorch backend (CUDA, MPS, or CPU)."""
+    if torch.cuda.is_available():
+        print(
+            f"Using CUDA {torch.version.cuda} with cuDNN {torch.backends.cudnn.version()}"
+        )
+        return torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        print("Using MPS")
+        return torch.device("mps")
+    else:
+        print("Using CPU")
+        return torch.device("cpu")
+
+
+def cross_entropy_with_probs(
+    logits: torch.Tensor,
+    target_probs: torch.Tensor,
+    *,
+    weights: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """Cross-entropy for probabilistic targets with optional sample weights.
+
+    Computes per-sample loss = -sum p * log_softmax(logits), and returns:
+    - mean over batch if `weights` is None
+    - weighted mean sum(w*l)/sum(w) if `weights` is provided (0-d if sum(w)==0 -> 0)
+    """
+    assert logits.device == target_probs.device
+
+    logp = F.log_softmax(logits, dim=-1)
+    per_sample = -(target_probs * logp).sum(dim=-1)
+    if weights is None:
+        return per_sample.mean()
+    w = weights.to(per_sample.dtype)
+    denom = w.sum()
+    if denom.item() == 0.0:
+        return per_sample.new_tensor(0.0)
+    return (per_sample * w).sum() / denom
+
+
 def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     """Train the model for ``hp.max_steps`` and return last-step metrics.
 
@@ -76,8 +115,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     - hp: Training hyperparameters.
     - name: Optional run name used for the Weights & Biases run.
     """
-    device_str = "cuda" if torch.cuda.is_available() else "cpu"
-    device = torch.device(device_str)
+    device = init_torch_backend()
 
     data_dir = resolve_training_data_path()
     ds = Lc0V6Dataset(data_dir)
@@ -101,24 +139,23 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     step = 0
     last = {"loss": 0.0, "policy": 0.0, "value": 0.0}
     for batch in dl:
-        # Move tensors we use to device
-        for k, v in list(batch.items()):
-            if isinstance(v, torch.Tensor):
-                batch[k] = v.to(device)
-
         x = lc0_to_features(batch)
-        out = model(x)
+        out = model(x.to(device))
 
         # Targets
-        pol_tgt = _normalize_policy_target(
-            batch["policy"], batch["played_idx"]
+        pol_tgt = _normalize_policy_target(batch["policy"], batch["played_idx"]).to(
+            device
         )  # (B,1858)
-        wdl_tgt = wdl_from_qd(batch["root_q"], batch["root_d"])  # (B,3)
+        wdl_tgt = wdl_from_qd(batch["root_q"], batch["root_d"]).to(
+            device, torch.float32
+        )  # (B,3)
 
         # Mask illegal moves at the logits level wherever policy < 0
         # This prevents illegal classes from contributing to the loss.
         illegal_mask = batch["policy"] < 0
-        masked_policy_logits = out["policy_logits"].masked_fill(illegal_mask, -1e9)
+        masked_policy_logits = out["policy_logits"].masked_fill(
+            illegal_mask.to(device), -1e9
+        )
 
         # Losses
         policy_loss = cross_entropy_with_probs(masked_policy_logits, pol_tgt)
