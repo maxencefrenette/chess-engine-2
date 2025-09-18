@@ -63,17 +63,9 @@ def _normalize_policy_target(
     return norm
 
 
-def _resolve_training_data_path() -> Path:
-    """Resolve the training data directory strictly from `TRAINING_DATA_PATH`.
-
-    Raises a clear error if not set.
-    """
-    raw = os.environ.get("TRAINING_DATA_PATH")
-    if not raw:
-        raise RuntimeError(
-            "TRAINING_DATA_PATH is not set. Define it in your .env file or export it."
-        )
-    expanded = os.path.expanduser(os.path.expandvars(raw))
+def resolve_training_data_path() -> Path:
+    """Resolve the training data directory from the `TRAINING_DATA_PATH` env variable."""
+    expanded = os.path.expanduser(os.path.expandvars(os.environ["TRAINING_DATA_PATH"]))
     return Path(expanded)
 
 
@@ -87,7 +79,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
     device_str = "cuda" if torch.cuda.is_available() else "cpu"
     device = torch.device(device_str)
 
-    data_dir = _resolve_training_data_path()
+    data_dir = resolve_training_data_path()
     ds = Lc0V6Dataset(data_dir)
     datapipe = IterableWrapper(ds)
     datapipe = Shuffler(datapipe, buffer_size=hp.shuffle_buffer_size)
