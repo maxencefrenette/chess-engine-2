@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import os
 from collections.abc import Mapping
+from functools import cached_property
 from pathlib import Path
-from typing import Any
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 
 
 class Hyperparameters(BaseModel):
@@ -17,8 +17,8 @@ class Hyperparameters(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    flops_budget: float = Field(gt=0)
     batch_size: int = Field(gt=0)
-    steps: int = Field(gt=0)
     lr: float = Field(gt=0)
     lr_cooldown_frac: float = Field(default=0.0, ge=0.0, le=1.0)
     model_dim: int = Field(gt=0)
@@ -27,9 +27,18 @@ class Hyperparameters(BaseModel):
     value_sampling_rate: float = Field(ge=0.0, le=1.0)
     shuffle_buffer_size: int = Field(gt=0)
 
-    @classmethod
-    def from_dict(cls, data: Mapping[str, Any]) -> Hyperparameters:
-        return cls(**dict(data))
+    @computed_field
+    @cached_property
+    def steps(self) -> int:
+        """Number of training steps to run, derived from the FLOPS budget."""
+        from .train import MLPModel  # avoid circular import
+
+        steps = int(self.flops_budget / MLPModel.flops_per_batch(self))
+        if steps <= 0:
+            raise ValueError(
+                f"FLOPS budget too low for one training step: {self.flops_budget}"
+            )
+        return steps
 
     @classmethod
     def from_yaml(cls, path: os.PathLike[str] | str) -> Hyperparameters:
@@ -40,7 +49,7 @@ class Hyperparameters(BaseModel):
             raise ValueError(
                 f"Expected a mapping at {p}, got: {type(content).__name__}"
             )
-        return cls.from_dict(content)
+        return cls(**dict(content))
 
 
 __all__ = ["Hyperparameters"]

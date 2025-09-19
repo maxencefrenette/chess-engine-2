@@ -1,6 +1,6 @@
+flops_budget: 1e9
 batch_size: 16
-steps: 10
-lr: 0.01
+lr: 0.001
 lr_cooldown_frac: 0.2
 model_dim: 256
 intermediate_dim: 1024
