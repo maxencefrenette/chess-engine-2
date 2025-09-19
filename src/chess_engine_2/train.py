@@ -26,6 +26,7 @@ ROOT = Path(__file__).resolve()
 load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
 WANDB_PROJECT = "chess-engine-2"
+CHECKPOINT_FREQUENCY = 50000
 
 
 def sanitize_run_name(name: str) -> str:
@@ -246,7 +247,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         }
 
         wandb_run.log(last, step=step)
-        if step % 10000 == 0 and step > 0 and step < hp.steps - 1:
+        if step % CHECKPOINT_FREQUENCY == 0 and step > 0 and step < hp.steps - 1:
             state = checkpoint_state(
                 step=step,
                 model=model,
