@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import torch
 import torch.nn.functional as F
@@ -24,6 +26,61 @@ ROOT = Path(__file__).resolve()
 load_dotenv(dotenv_path=(ROOT.parents[2] / ".env"))
 
 WANDB_PROJECT = "chess-engine-2"
+
+
+def sanitize_run_name(name: str) -> str:
+    return "".join(c if c.isalnum() or c in ("-", "_", ".") else "_" for c in name)
+
+
+def prepare_checkpoint_dir(run_name: str) -> Path:
+    try:
+        root = Path(os.environ["CHECKPOINTS_PATH"]).expanduser()
+    except KeyError as exc:
+        msg = (
+            "CHECKPOINTS_PATH environment variable must be set to enable checkpointing"
+        )
+        raise RuntimeError(msg) from exc
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    safe_run = sanitize_run_name(run_name)
+    target = root / f"{timestamp}_{safe_run}"
+    target.mkdir(parents=True, exist_ok=True)
+    return target
+
+
+def checkpoint_state(
+    *,
+    step: int,
+    model: torch.nn.Module,
+    optimizer: torch.optim.Optimizer,
+    hp: Hyperparameters,
+) -> dict[str, Any]:
+    return {
+        "step": step,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "hyperparameters": hp.model_dump(),
+    }
+
+
+def save_checkpoint(path: Path, state: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(state, path)
+
+
+def export_final_model(
+    path: Path,
+    *,
+    state: dict[str, Any],
+    hp: Hyperparameters,
+) -> None:
+    model_state = state["model_state_dict"]
+    cpu_state = {k: v.detach().cpu() for k, v in model_state.items()}
+    payload = {
+        "model_state_dict": cpu_state,
+        "hyperparameters": hp.model_dump(),
+    }
+    torch.save(payload, path)
 
 
 def get_lr(hp: Hyperparameters, step: int) -> float:
@@ -125,6 +182,7 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
 
     model = MLPModel(hp).to(device)
     opt = torch.optim.SGD(model.parameters(), lr=get_lr(hp, 0))
+    checkpoint_dir = prepare_checkpoint_dir(run_name)
 
     wandb_run = wandb.init(
         project=WANDB_PROJECT,
@@ -188,11 +246,33 @@ def train(run_name: str, hp: Hyperparameters) -> dict[str, float]:
         }
 
         wandb_run.log(last, step=step)
+        if step % 10000 == 0 and step > 0 and step < hp.steps - 1:
+            state = checkpoint_state(
+                step=step,
+                model=model,
+                optimizer=opt,
+                hp=hp,
+            )
+            save_checkpoint(checkpoint_dir / f"{step}.ckpt", state)
         step += 1
         if step >= hp.steps:
             break
 
     wandb_run.finish()
+
+    final_step = max(step - 1, 0)
+    final_state = checkpoint_state(
+        step=final_step,
+        model=model,
+        optimizer=opt,
+        hp=hp,
+    )
+    save_checkpoint(checkpoint_dir / "final.ckpt", final_state)
+    export_final_model(
+        checkpoint_dir / "final.pt",
+        state=final_state,
+        hp=hp,
+    )
 
     return last
 
